@@ -11,11 +11,17 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, unique: true })
   email: string;
 
   @Column({ nullable: false })
   password: string;
+
+  @Column({ name: 'password_salt' })
+  passwordSalt: string;
+
+  @Column({ name: 'refresh_token' })
+  refreshToken: string;
 
   @Column({ nullable: false })
   name: string;

@@ -1,9 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
-import * as bcrypt from 'bcrypt';
+import { SignupUserDto } from './dto/signup.user.dto';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class UsersService {
@@ -12,9 +16,38 @@ export class UsersService {
     private userRepository: Repository<User>,
   ) {}
 
-  async create(user: CreateUserDto): Promise<void> {
-    const saltRounds = 10;
-    user.password = await bcrypt.hash(user.password, saltRounds);
-    await this.userRepository.save(user);
+  async findOneByEmail(email: string): Promise<User | null> {
+    const user = await this.userRepository.findOneBy({ email });
+    if (!user) {
+      throw new NotFoundException(`User with Email ${email} not found`);
+    }
+    return user;
+  }
+
+  async findOneByPhone(phoneNumber: string): Promise<User | null> {
+    const user = await this.userRepository.findOneBy({ phoneNumber });
+    if (!user) {
+      throw new NotFoundException(`User with Email ${phoneNumber} not found`);
+    }
+    return user;
+  }
+
+  async create(userData: SignupUserDto): Promise<void> {
+    const { email, phoneNumber, driversLicenseNumber, password } = userData;
+    const duplicateEmail = await this.userRepository.findOneBy({ email });
+    const duplicatePhone = await this.userRepository.findOneBy({ phoneNumber });
+    const duplicateLicense = await this.userRepository.findOneBy({
+      driversLicenseNumber,
+    });
+    if (duplicateEmail || duplicatePhone || duplicateLicense)
+      throw new UnauthorizedException('Duplicate User');
+
+    const salt = await crypto.randomBytes(64).toString('base64');
+    userData.passwordSalt = salt;
+    userData.password = await crypto
+      .pbkdf2Sync(password, salt, 1000, 32, 'SHA512')
+      .toString('base64');
+
+    await this.userRepository.save(userData);
   }
 }
