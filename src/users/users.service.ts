@@ -24,14 +24,6 @@ export class UsersService {
     return user;
   }
 
-  async findOneByPhone(phoneNumber: string): Promise<User | null> {
-    const user = await this.userRepository.findOneBy({ phoneNumber });
-    if (!user) {
-      throw new NotFoundException(`User with Email ${phoneNumber} not found`);
-    }
-    return user;
-  }
-
   async create(userData: SignupUserDto): Promise<void> {
     const { email, phoneNumber, driversLicenseNumber, password } = userData;
     const duplicateEmail = await this.userRepository.findOneBy({ email });

@@ -1,4 +1,9 @@
-import { IsDateString, IsPhoneNumber, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDateString,
+  IsPhoneNumber,
+  IsString,
+} from 'class-validator';
 import { SigninAuthDto } from 'src/auth/dto/signin.auth.dto';
 
 export class SignupUserDto extends SigninAuthDto {
@@ -13,4 +18,7 @@ export class SignupUserDto extends SigninAuthDto {
 
   @IsDateString()
   readonly birthday: Date;
+
+  @IsBoolean()
+  readonly marketingAgreement: boolean;
 }

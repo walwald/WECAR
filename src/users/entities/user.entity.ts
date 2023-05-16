@@ -20,7 +20,7 @@ export class User {
   @Column({ name: 'password_salt' })
   passwordSalt: string;
 
-  @Column({ name: 'refresh_token' })
+  @Column({ name: 'refresh_token', nullable: true })
   refreshToken: string;
 
   @Column({ nullable: false })
@@ -34,6 +34,9 @@ export class User {
 
   @Column({ nullable: false })
   birthday: Date;
+
+  @Column({ name: 'marketing_agreement' })
+  marketingAgreement: boolean;
 
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;

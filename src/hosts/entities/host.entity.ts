@@ -17,11 +17,20 @@ export class Host {
   @Column({ nullable: false })
   password: string;
 
+  @Column({ name: 'password_salt' })
+  passwordSalt: string;
+
+  @Column({ name: 'refresh_token', nullable: true })
+  refreshToken: string;
+
   @Column({ nullable: false })
   name: string;
 
   @Column({ name: 'phone_number', unique: true, nullable: false })
   phoneNumber: string;
+
+  @Column({ name: 'marketing_agreement' })
+  marketingAgreement: boolean;
 
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;
