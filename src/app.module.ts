@@ -4,11 +4,13 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { CarsModule } from './cars/cars.module';
-import { SellersModule } from './hosts/hosts.module';
+import { HostsModule } from './hosts/hosts.module';
 import { BookingsModule } from './bookings/bookings.module';
 import * as dotenv from 'dotenv';
 import { User } from './users/entities/user.entity';
 import { Host } from './hosts/entities/host.entity';
+import { DataSource } from 'typeorm';
+import { AuthModule } from './auth/auth.module';
 
 dotenv.config();
 
@@ -30,10 +32,13 @@ dotenv.config();
     }),
     UsersModule,
     CarsModule,
-    SellersModule,
+    HostsModule,
     BookingsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private datasource: DataSource) {}
+}
