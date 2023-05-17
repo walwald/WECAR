@@ -35,12 +35,15 @@ export class AuthService {
       .toString('base64');
   }
 
-  async createRefreshToken(id: number): Promise<string> {
+  createRefreshToken(id: number): string {
     const payload: Payload = { id };
     return this.jwtService.sign(payload, { expiresIn: '14d' });
   }
 
-  async createAccessToken(userOrHost: User | Host): Promise<string> {
+  //id랑 name만 받을 수 있게 entity 에서 implement/extends 할 수 있음
+  //createTokens으로 함수 합치기
+
+  createAccessToken(userOrHost: User | Host): string {
     const payload: Payload = {
       id: userOrHost.id,
       name: userOrHost.name,
@@ -49,6 +52,8 @@ export class AuthService {
     return this.jwtService.sign(payload);
   }
 
+  //entity에서 함수를 작성하고 그 함수 호출해서 password 체크 > 그 class를 상속받기
+  //user나 host가 password(passwordcheck하는 메서드 포함) class를 상속받기
   async passwordCheck(signinData: SigninAuthDto, userOrHost: User | Host) {
     const hashedPassword = await this.hashPassword(
       signinData.password,
@@ -73,6 +78,7 @@ export class AuthService {
     this.hostSigninLogRepository.save({ host, ip, agent });
   }
 
+  //User랑 Host 로그인 공통 로직 하나로 묶기
   async userSignin(signinData: SigninAuthDto, req: Request) {
     const user = await this.usersService.findOneByEmail(signinData.email);
     await this.passwordCheck(signinData, user);

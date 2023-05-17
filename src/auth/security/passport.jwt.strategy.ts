@@ -5,6 +5,8 @@ import { AuthService } from '../auth.service';
 import { Payload } from './payload.interface';
 import { Request } from 'express';
 
+//파일 분리 user, host
+
 @Injectable()
 export class UserAtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
   constructor(private authService: AuthService) {
@@ -14,6 +16,8 @@ export class UserAtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
       ignoreExpoiration: true,
     });
   }
+
+  //user를 매번 확인해야 할 지/ payload에 id 있으니까
   async validate(payload: Payload): Promise<any> {
     const user = await this.authService.tokenValidateUser(payload);
     if (!user) throw new UnauthorizedException('User Not Found');
@@ -49,8 +53,9 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
     });
   }
 
+  //
   async validate(req: Request, payload: Payload) {
-    const refreshToken = req.get('authorization').split('Bearer ')[1];
+    const [, refreshToken] = req.get('authorization').split('Bearer ');
 
     return {
       ...payload,

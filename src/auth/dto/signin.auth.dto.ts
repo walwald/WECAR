@@ -15,7 +15,7 @@ export class SigninAuthDto {
   @Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[!@#])[\da-zA-Z!@#]{8,}$/)
   password: string;
 
-  @IsString()
-  @IsOptional()
-  passwordSalt: string;
+  // @IsString()
+  // @IsOptional()
+  // passwordSalt: string;
 }

@@ -16,6 +16,7 @@ import { HostsService } from 'src/hosts/hosts.service';
 import { Host } from 'src/hosts/entities/host.entity';
 import { UserSigninLog } from 'src/users/entities/user-signin.log.entity';
 import { HostSigninLog } from 'src/hosts/entities/host-signin.log.entity';
+import { UsersModule } from 'src/users/users.module';
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ dotenv.config();
     }),
     TypeOrmModule.forFeature([User, Host, UserSigninLog, HostSigninLog]),
     PassportModule,
+    UsersModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -38,4 +40,5 @@ dotenv.config();
     RtStrategy,
   ],
 })
+//module import하고 그 안에서 service export
 export class AuthModule {}

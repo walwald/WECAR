@@ -7,3 +7,4 @@ export class SigninLogDto {
   @IsString()
   agent: string;
 }
+//interface or type

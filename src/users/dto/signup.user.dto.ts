@@ -22,3 +22,5 @@ export class SignupUserDto extends SigninAuthDto {
   @IsBoolean()
   readonly marketingAgreement: boolean;
 }
+
+//IsNotEmpty() 같은 벨리데이터 추가

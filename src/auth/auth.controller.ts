@@ -20,6 +20,7 @@ export class AuthController {
   userSignin(@Body() signinData: SigninAuthDto, @Req() req: Request) {
     return this.authService.userSignin(signinData, req);
   }
+  //req에서 ip, agent 뽑아서 넘기기
 
   @Post('signin/host')
   hostSignin(@Body() signinData: SigninAuthDto, @Req() req: Request) {

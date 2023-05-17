@@ -40,6 +40,8 @@ export class UsersService {
       .pbkdf2Sync(password, salt, 1000, 32, 'SHA512')
       .toString('base64');
 
+    //salt를 따로 넣기
+
     await this.userRepository.save(userData);
   }
 }

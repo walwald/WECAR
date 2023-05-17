@@ -42,3 +42,5 @@ dotenv.config();
 export class AppModule {
   constructor(private datasource: DataSource) {}
 }
+
+//dotenv말고 nest config 확인해보기
