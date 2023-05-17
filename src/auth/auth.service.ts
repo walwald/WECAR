@@ -99,12 +99,13 @@ export class AuthService {
     return await this.hostRepository.findOneBy({ id: payload.id });
   }
 
-  async refreshUserAccessToken(reqUser: User) {
+  async refreshUserAccessToken(reqUser) {
     const user = await this.userRepository.findOneBy({ id: reqUser.id });
-
+    console.log('user에서 가져온 refreshToken', user.refreshToken);
+    console.log('req에서 가져온 refreshToken', reqUser.refreshToken);
     if (!user) throw new UnauthorizedException('User Not Found');
 
-    if (user.refreshToken !== reqUser.refreshToken) {
+    if (user.refreshToken != reqUser.refreshToken) {
       throw new UnauthorizedException('Invalid Token');
     }
 
@@ -114,9 +115,10 @@ export class AuthService {
     };
 
     const refreshToken = await this.createRefreshToken(user.id);
-    this.userRepository.update({ id: user.id }, { refreshToken });
+    await this.userRepository.update({ id: user.id }, { refreshToken });
+
     return {
-      accessToken: await this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload),
       refreshToken,
     };
   }

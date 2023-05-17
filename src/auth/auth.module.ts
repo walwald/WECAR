@@ -9,6 +9,7 @@ import { UsersService } from 'src/users/users.service';
 import { PassportModule } from '@nestjs/passport';
 import {
   HostAtStrategy,
+  RtStrategy,
   UserAtStrategy,
 } from './security/passport.jwt.strategy';
 import { HostsService } from 'src/hosts/hosts.service';
@@ -34,6 +35,7 @@ dotenv.config();
     HostsService,
     UserAtStrategy,
     HostAtStrategy,
+    RtStrategy,
   ],
 })
 export class AuthModule {}
