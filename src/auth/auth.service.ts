@@ -98,25 +98,26 @@ export class AuthService {
   async tokenValidateHost(payload: Payload): Promise<Host | null> {
     return await this.hostRepository.findOneBy({ id: payload.id });
   }
-  // async refreshAccessToken(reqUser: User) {
-  //   const user = await this.userRepository.findOneBy({ id: reqUser.id });
 
-  //   if (!user) throw new UnauthorizedException('User Not Found');
+  async refreshUserAccessToken(reqUser: User) {
+    const user = await this.userRepository.findOneBy({ id: reqUser.id });
 
-  //   if (user.refreshToken !== reqUser.refreshToken) {
-  //     throw new UnauthorizedException('Invalid Token');
-  //   }
+    if (!user) throw new UnauthorizedException('User Not Found');
 
-  //   const payload: Payload = {
-  //     id: user.id,
-  //     name: user.name,
-  //   };
+    if (user.refreshToken !== reqUser.refreshToken) {
+      throw new UnauthorizedException('Invalid Token');
+    }
 
-  //   const refreshToken = await this.createRefreshToken(user.id);
-  //   this.userRepository.update({ id: user.id }, { refreshToken });
-  //   return {
-  //     accessToken: await this.jwtService.sign(payload),
-  //     refreshToken,
-  //   };
-  // }
+    const payload: Payload = {
+      id: user.id,
+      name: user.name,
+    };
+
+    const refreshToken = await this.createRefreshToken(user.id);
+    this.userRepository.update({ id: user.id }, { refreshToken });
+    return {
+      accessToken: await this.jwtService.sign(payload),
+      refreshToken,
+    };
+  }
 }

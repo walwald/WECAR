@@ -40,8 +40,8 @@ export class AuthController {
 
   // @Get('refresh')
   // @UseGuards(AuthGuard('jwt-refresh'))
-  // refreshAccessToken(@Req() req: Request, @Res() res: Response) {
-  //   this.authService.refreshAccessToken(req.user);
+  // refreshUserAccessToken(@Req() req: Request, @Res() res: Response) {
+  //   this.authService.refreshUserAccessToken(req.user);
 
   //   res.redirect('/');
   // }
