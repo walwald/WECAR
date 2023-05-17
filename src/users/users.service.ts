@@ -8,12 +8,19 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { SignupUserDto } from './dto/signup.user.dto';
 import * as crypto from 'crypto';
+import { SigninAuthDto } from 'src/auth/dto/signin.auth.dto';
+import { AuthService } from 'src/auth/auth.service';
+import { UserSigninLog } from './entities/user-signin.log.entity';
+import { Request } from 'express';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(UserSigninLog)
+    private userSigninLogRepository: Repository<UserSigninLog>,
+    private authService: AuthService,
   ) {}
 
   async findOneByEmail(email: string): Promise<User | null> {
@@ -41,5 +48,25 @@ export class UsersService {
       .toString('base64');
 
     await this.userRepository.save(userData);
+    return;
+  }
+
+  async userSignin(signinData: SigninAuthDto, req: Request) {
+    const user = await this.findOneByEmail(signinData.email);
+    const accessToken = await this.authService.createAccessToken(
+      signinData,
+      user,
+    );
+    const refreshToken = await this.authService.createRefreshToken(user.id);
+    await this.userRepository.update({ id: user.id }, { refreshToken });
+    this.saveUserSigninLog(user, req);
+    return { accessToken, refreshToken };
+  }
+
+  saveUserSigninLog(user: User, req: Request) {
+    const ip = req.get('host');
+    const agent = req.get('User-Agent');
+    this.userSigninLogRepository.save({ user, ip, agent });
+    return;
   }
 }

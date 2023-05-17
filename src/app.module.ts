@@ -11,6 +11,8 @@ import { User } from './users/entities/user.entity';
 import { Host } from './hosts/entities/host.entity';
 import { DataSource } from 'typeorm';
 import { AuthModule } from './auth/auth.module';
+import { UserSigninLog } from './users/entities/user-signin.log.entity';
+import { HostSigninLog } from './hosts/entities/host-signin.log.entity';
 
 dotenv.config();
 
@@ -23,7 +25,7 @@ dotenv.config();
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [User, Host],
+      entities: [User, Host, UserSigninLog, HostSigninLog],
       synchronize: true,
       autoLoadEntities: true,
       charset: 'utf8mb4',

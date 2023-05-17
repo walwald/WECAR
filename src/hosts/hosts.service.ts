@@ -8,12 +8,19 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SignupHostDto } from './dto/signup.host.dto';
 import * as crypto from 'crypto';
+import { HostSigninLog } from './entities/host-signin.log.entity';
+import { AuthService } from 'src/auth/auth.service';
+import { Request } from 'express';
+import { SigninAuthDto } from 'src/auth/dto/signin.auth.dto';
 
 @Injectable()
 export class HostsService {
   constructor(
     @InjectRepository(Host)
     private hostRepository: Repository<Host>,
+    @InjectRepository(HostSigninLog)
+    private hostSigninLogRepository: Repository<HostSigninLog>,
+    private authService: AuthService,
   ) {}
 
   async findOneByEmail(email: string): Promise<Host | null> {
@@ -39,5 +46,25 @@ export class HostsService {
       .toString('base64');
 
     await this.hostRepository.save(hostData);
+    return;
+  }
+
+  async hostSignin(signinData: SigninAuthDto, req: Request) {
+    const host = await this.findOneByEmail(signinData.email);
+    const accessToken = await this.authService.createAccessToken(
+      signinData,
+      host,
+    );
+    const refreshToken = await this.authService.createRefreshToken(host.id);
+    await this.hostRepository.update({ id: host.id }, { refreshToken });
+    this.saveHostSigninLog(host, req);
+    return { accessToken, refreshToken };
+  }
+
+  saveHostSigninLog(host: Host, req: Request) {
+    const ip = req.get('host');
+    const agent = req.get('User-Agent');
+    this.hostSigninLogRepository.save({ host, ip, agent });
+    return;
   }
 }

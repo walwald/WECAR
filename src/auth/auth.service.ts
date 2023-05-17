@@ -1,17 +1,12 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { Repository } from 'typeorm';
 import { SigninAuthDto } from './dto/signin.auth.dto';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { Payload } from './security/payload.interface';
-import { UsersService } from 'src/users/users.service';
 import { Host } from 'src/hosts/entities/host.entity';
-import { HostsService } from 'src/hosts/hosts.service';
-import { UserSigninLog } from 'src/users/entities/user-signin.log.entity';
-import { HostSigninLog } from 'src/hosts/entities/host-signin.log.entity';
-import { Request } from 'express';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
@@ -20,12 +15,6 @@ export class AuthService {
     private userRepository: Repository<User>,
     @InjectRepository(Host)
     private hostRepository: Repository<Host>,
-    @InjectRepository(UserSigninLog)
-    private userSigninLogRepository: Repository<UserSigninLog>,
-    @InjectRepository(HostSigninLog)
-    private hostSigninLogRepository: Repository<HostSigninLog>,
-    private usersService: UsersService,
-    private hostsService: HostsService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -59,36 +48,6 @@ export class AuthService {
     };
 
     return this.jwtService.sign(payload);
-  }
-
-  saveUserSigninLog(user: User, req: Request) {
-    const ip = req.get('host');
-    const agent = req.get('User-Agent');
-    this.userSigninLogRepository.save({ user, ip, agent });
-  }
-
-  saveHostSigninLog(host: Host, req: Request) {
-    const ip = req.get('host');
-    const agent = req.get('User-Agent');
-    this.hostSigninLogRepository.save({ host, ip, agent });
-  }
-
-  async userSignin(signinData: SigninAuthDto, req: Request) {
-    const user = await this.usersService.findOneByEmail(signinData.email);
-    const accessToken = await this.createAccessToken(signinData, user);
-    const refreshToken = await this.createRefreshToken(user.id);
-    await this.userRepository.update({ id: user.id }, { refreshToken });
-    this.saveUserSigninLog(user, req);
-    return { accessToken, refreshToken };
-  }
-
-  async hostSignin(signinData: SigninAuthDto, req) {
-    const host = await this.hostsService.findOneByEmail(signinData.email);
-    const accessToken = await this.createAccessToken(signinData, host);
-    const refreshToken = await this.createRefreshToken(host.id);
-    await this.hostRepository.update({ id: host.id }, { refreshToken });
-    this.saveHostSigninLog(host, req);
-    return { accessToken, refreshToken };
   }
 
   async tokenValidateUser(payload: Payload): Promise<User | null> {
