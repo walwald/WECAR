@@ -40,10 +40,16 @@ export class AuthService {
     return this.jwtService.sign(payload, { expiresIn: '14d' });
   }
 
-  async createAccessToken(
-    signinData: SigninAuthDto,
-    userOrHost: User | Host,
-  ): Promise<string> {
+  async createAccessToken(userOrHost: User | Host): Promise<string> {
+    const payload: Payload = {
+      id: userOrHost.id,
+      name: userOrHost.name,
+    };
+
+    return this.jwtService.sign(payload);
+  }
+
+  async passwordCheck(signinData: SigninAuthDto, userOrHost: User | Host) {
     const hashedPassword = await this.hashPassword(
       signinData.password,
       userOrHost.passwordSalt,
@@ -52,13 +58,7 @@ export class AuthService {
     if (userOrHost.password !== hashedPassword) {
       throw new UnauthorizedException('Invalid Email or Password');
     }
-
-    const payload: Payload = {
-      id: userOrHost.id,
-      name: userOrHost.name,
-    };
-
-    return this.jwtService.sign(payload);
+    return;
   }
 
   saveUserSigninLog(user: User, req: Request) {
@@ -75,7 +75,8 @@ export class AuthService {
 
   async userSignin(signinData: SigninAuthDto, req: Request) {
     const user = await this.usersService.findOneByEmail(signinData.email);
-    const accessToken = await this.createAccessToken(signinData, user);
+    await this.passwordCheck(signinData, user);
+    const accessToken = await this.createAccessToken(user);
     const refreshToken = await this.createRefreshToken(user.id);
     await this.userRepository.update({ id: user.id }, { refreshToken });
     this.saveUserSigninLog(user, req);
@@ -84,7 +85,8 @@ export class AuthService {
 
   async hostSignin(signinData: SigninAuthDto, req) {
     const host = await this.hostsService.findOneByEmail(signinData.email);
-    const accessToken = await this.createAccessToken(signinData, host);
+    await this.passwordCheck(signinData, host);
+    const accessToken = await this.createAccessToken(host);
     const refreshToken = await this.createRefreshToken(host.id);
     await this.hostRepository.update({ id: host.id }, { refreshToken });
     this.saveHostSigninLog(host, req);
@@ -101,24 +103,34 @@ export class AuthService {
 
   async refreshUserAccessToken(reqUser) {
     const user = await this.userRepository.findOneBy({ id: reqUser.id });
-    console.log('user에서 가져온 refreshToken', user.refreshToken);
-    console.log('req에서 가져온 refreshToken', reqUser.refreshToken);
     if (!user) throw new UnauthorizedException('User Not Found');
 
-    if (user.refreshToken != reqUser.refreshToken) {
-      throw new UnauthorizedException('Invalid Token');
+    if (user.refreshToken !== reqUser.refreshToken) {
+      throw new UnauthorizedException('Invalid Refresh Token');
     }
-
-    const payload: Payload = {
-      id: user.id,
-      name: user.name,
-    };
 
     const refreshToken = await this.createRefreshToken(user.id);
     await this.userRepository.update({ id: user.id }, { refreshToken });
 
     return {
-      accessToken: this.jwtService.sign(payload),
+      accessToken: await this.createAccessToken(user),
+      refreshToken,
+    };
+  }
+
+  async refreshHostAccessToken(reqUser) {
+    const host = await this.hostRepository.findOneBy({ id: reqUser.id });
+    if (!host) throw new UnauthorizedException('Host Not Found');
+
+    if (host.refreshToken !== reqUser.refreshToken) {
+      throw new UnauthorizedException('Invalid Refresh Token');
+    }
+
+    const refreshToken = await this.createRefreshToken(host.id);
+    await this.hostRepository.update({ id: host.id }, { refreshToken });
+
+    return {
+      accessToken: await this.createAccessToken(host),
       refreshToken,
     };
   }

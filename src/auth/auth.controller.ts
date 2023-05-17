@@ -38,9 +38,15 @@ export class AuthController {
     return req.user;
   }
 
-  @Get('refresh')
+  @Get('refresh/user')
   @UseGuards(AuthGuard('jwt-refresh'))
-  refreshUserAccessToken(@Req() req: Request, @Res() res: Response) {
+  refreshUserAccessToken(@Req() req: Request) {
     return this.authService.refreshUserAccessToken(req.user);
+  }
+
+  @Get('refresh/host')
+  @UseGuards(AuthGuard('jwt-refresh'))
+  refreshHostAccessToken(@Req() req: Request) {
+    return this.authService.refreshHostAccessToken(req.user);
   }
 }
