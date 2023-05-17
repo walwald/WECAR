@@ -6,6 +6,9 @@ import { Payload } from './payload.interface';
 import { Request } from 'express';
 import { UsersService } from 'src/users/users.service';
 import { HostsService } from 'src/hosts/hosts.service';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 @Injectable()
 export class UserAtStrategy extends PassportStrategy(Strategy, 'jwt-user') {

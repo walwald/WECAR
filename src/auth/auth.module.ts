@@ -31,12 +31,6 @@ dotenv.config();
   ],
   exports: [TypeOrmModule],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    UserAtStrategy,
-    HostAtStrategy,
-    UsersService,
-    HostsService,
-  ],
+  providers: [AuthService],
 })
 export class AuthModule {}
