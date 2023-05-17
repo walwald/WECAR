@@ -12,6 +12,7 @@ import { HostSigninLog } from './entities/host-signin.log.entity';
 import { AuthService } from 'src/auth/auth.service';
 import { Request } from 'express';
 import { SigninAuthDto } from 'src/auth/dto/signin.auth.dto';
+import { Payload } from 'src/auth/security/payload.interface';
 
 @Injectable()
 export class HostsService {
@@ -66,5 +67,9 @@ export class HostsService {
     const agent = req.get('User-Agent');
     this.hostSigninLogRepository.save({ host, ip, agent });
     return;
+  }
+
+  async tokenValidateHost(payload: Payload): Promise<Host | null> {
+    return await this.hostRepository.findOneBy({ id: payload.id });
   }
 }

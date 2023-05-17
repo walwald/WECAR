@@ -4,10 +4,12 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService } from '../auth.service';
 import { Payload } from './payload.interface';
 import { Request } from 'express';
+import { UsersService } from 'src/users/users.service';
+import { HostsService } from 'src/hosts/hosts.service';
 
 @Injectable()
 export class UserAtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
-  constructor(private authService: AuthService) {
+  constructor(private usersService: UsersService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: process.env.SECRET_KEY,
@@ -15,7 +17,7 @@ export class UserAtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
     });
   }
   async validate(payload: Payload): Promise<any> {
-    const user = await this.authService.tokenValidateUser(payload);
+    const user = await this.usersService.tokenValidateUser(payload);
     if (!user) throw new UnauthorizedException('User Not Found');
 
     return user;
@@ -24,7 +26,7 @@ export class UserAtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
 
 @Injectable()
 export class HostAtStrategy extends PassportStrategy(Strategy, 'jwt-host') {
-  constructor(private authService: AuthService) {
+  constructor(private hostsService: HostsService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: process.env.SECRET_KEY,
@@ -32,7 +34,7 @@ export class HostAtStrategy extends PassportStrategy(Strategy, 'jwt-host') {
     });
   }
   async validate(payload: Payload): Promise<any> {
-    const host = await this.authService.tokenValidateHost(payload);
+    const host = await this.hostsService.tokenValidateHost(payload);
     if (!host) throw new UnauthorizedException('Host Not Found');
 
     return host;

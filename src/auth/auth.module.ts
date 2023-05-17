@@ -11,6 +11,7 @@ import {
   UserAtStrategy,
 } from './security/passport.jwt.strategy';
 import { Host } from 'src/hosts/entities/host.entity';
+import { HostsModule } from 'src/hosts/hosts.module';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ dotenv.config();
     TypeOrmModule.forFeature([User, Host]),
     PassportModule,
   ],
+  exports: [TypeOrmModule],
   controllers: [AuthController],
   providers: [AuthService, UserAtStrategy, HostAtStrategy],
 })

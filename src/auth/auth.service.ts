@@ -10,13 +10,7 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-    @InjectRepository(Host)
-    private hostRepository: Repository<Host>,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private jwtService: JwtService) {}
 
   async hashPassword(password: string, salt: string): Promise<string> {
     return crypto
@@ -50,32 +44,25 @@ export class AuthService {
     return this.jwtService.sign(payload);
   }
 
-  async tokenValidateUser(payload: Payload): Promise<User | null> {
-    return await this.userRepository.findOneBy({ id: payload.id });
+  async refreshAccessToken(reqUser: User) {
+    // const user = await this.userRepository.findOneBy({ id: reqUser.id });
+
+    // if (!user) throw new UnauthorizedException('User Not Found');
+
+    // if (user.refreshToken !== reqUser.refreshToken) {
+    //   throw new UnauthorizedException('Invalid Token');
+    // }
+
+    // const payload: Payload = {
+    //   id: user.id,
+    //   name: user.name,
+    // };
+
+    // const refreshToken = await this.createRefreshToken(user.id);
+    // this.userRepository.update({ id: user.id }, { refreshToken });
+    return {
+      // accessToken: await this.jwtService.sign(payload),
+      // refreshToken,
+    };
   }
-
-  async tokenValidateHost(payload: Payload): Promise<Host | null> {
-    return await this.hostRepository.findOneBy({ id: payload.id });
-  }
-  // async refreshAccessToken(reqUser: User) {
-  //   const user = await this.userRepository.findOneBy({ id: reqUser.id });
-
-  //   if (!user) throw new UnauthorizedException('User Not Found');
-
-  //   if (user.refreshToken !== reqUser.refreshToken) {
-  //     throw new UnauthorizedException('Invalid Token');
-  //   }
-
-  //   const payload: Payload = {
-  //     id: user.id,
-  //     name: user.name,
-  //   };
-
-  //   const refreshToken = await this.createRefreshToken(user.id);
-  //   this.userRepository.update({ id: user.id }, { refreshToken });
-  //   return {
-  //     accessToken: await this.jwtService.sign(payload),
-  //     refreshToken,
-  //   };
-  // }
 }

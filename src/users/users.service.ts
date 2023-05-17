@@ -12,6 +12,7 @@ import { SigninAuthDto } from 'src/auth/dto/signin.auth.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { UserSigninLog } from './entities/user-signin.log.entity';
 import { Request } from 'express';
+import { Payload } from 'src/auth/security/payload.interface';
 
 @Injectable()
 export class UsersService {
@@ -68,5 +69,9 @@ export class UsersService {
     const agent = req.get('User-Agent');
     this.userSigninLogRepository.save({ user, ip, agent });
     return;
+  }
+
+  async tokenValidateUser(payload: Payload): Promise<User | null> {
+    return await this.userRepository.findOneBy({ id: payload.id });
   }
 }
