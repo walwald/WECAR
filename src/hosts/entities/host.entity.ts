@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { HostSigninLog } from './host-signin.log.entity';
 
 @Entity('hosts')
 export class Host {
@@ -37,4 +39,7 @@ export class Host {
 
   @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
   updatedAt: Date;
+
+  @OneToMany(() => HostSigninLog, (signinLog) => signinLog.host)
+  signinLogs: HostSigninLog[];
 }

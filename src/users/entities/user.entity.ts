@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { UserSigninLog } from './user-signin.log.entity';
 
 @Entity('users')
 export class User {
@@ -43,4 +45,7 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
   updatedAt: Date;
+
+  @OneToMany(() => UserSigninLog, (signinLog) => signinLog.user)
+  signinLogs: UserSigninLog[];
 }
