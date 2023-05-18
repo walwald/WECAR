@@ -7,10 +7,10 @@ import { Host } from './entities/host.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SignupHostDto } from './dto/signup.host.dto';
-import { Tokens } from 'src/auth/dto/token-related.interface';
 import { UtilsService } from 'src/utils/utils.service';
 import { SigninAuthDto } from 'src/auth/dto/signin-auth.dto';
 import { HostSigninLog } from './entities/host-signin.log.entity';
+import { ReqUser, Tokens } from 'src/auth/dto';
 
 @Injectable()
 export class HostsService {
@@ -64,6 +64,22 @@ export class HostsService {
 
     this.hostSigninLogRepository.save({ host, ip, agent });
 
+    const tokens = this.utilsService.createTokens(host.id, host.name);
+    await this.hostRepository.update(
+      { id: host.id },
+      { refreshToken: tokens.refreshToken },
+    );
+
+    return { ...tokens };
+  }
+
+  async refreshAccessToken(reqUser: ReqUser): Promise<Tokens> {
+    const host = await this.hostRepository.findOneBy({ id: reqUser.id });
+    if (!host) throw new UnauthorizedException('Host Not Found');
+
+    if (host.refreshToken !== reqUser.refreshToken) {
+      throw new UnauthorizedException('Invalid Refresh Token');
+    }
     const tokens = this.utilsService.createTokens(host.id, host.name);
     await this.hostRepository.update(
       { id: host.id },

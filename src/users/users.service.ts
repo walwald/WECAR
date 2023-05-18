@@ -8,9 +8,9 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { SignupUserDto } from './dto/signup.user.dto';
 import { UtilsService } from 'src/utils/utils.service';
-import { Tokens } from 'src/auth/dto/token-related.interface';
 import { SigninAuthDto } from 'src/auth/dto/signin-auth.dto';
 import { UserSigninLog } from './entities/user-signin-log.entity';
+import { ReqUser, Tokens } from 'src/auth/dto';
 
 @Injectable()
 export class UsersService {
@@ -66,7 +66,7 @@ export class UsersService {
     return this.utilsService.createTokens(newUser.id, newUser.name);
   }
 
-  //subscriber - user가 insert되면 다음 절차가 next afterupdate 같은 거 쓸 수 있음 afterinsert
+  //subscriber - user가 insert되면 다음 절차가 next 로그 저장 바로, afterupdate 같은 거 쓸 수 있음 afterinsert
   async signin(
     signinData: SigninAuthDto,
     ip: string,
@@ -78,6 +78,23 @@ export class UsersService {
 
     this.usersigninLogRepository.save({ user, ip, agent });
 
+    const tokens = this.utilsService.createTokens(user.id, user.name);
+    await this.userRepository.update(
+      { id: user.id },
+      { refreshToken: tokens.refreshToken },
+    );
+
+    return { ...tokens };
+  }
+
+  async refreshAccessToken(reqUser: ReqUser): Promise<Tokens> {
+    const user = await this.userRepository.findOneBy({ id: reqUser.id });
+    if (!user) throw new UnauthorizedException('User Not Found');
+
+    if (user.refreshToken !== reqUser.refreshToken) {
+      throw new UnauthorizedException('Invalid Refresh Token');
+    }
+    console.log('utilsService: ', this.utilsService);
     const tokens = this.utilsService.createTokens(user.id, user.name);
     await this.userRepository.update(
       { id: user.id },
