@@ -6,7 +6,6 @@ import { UsersModule } from './users/users.module';
 import { CarsModule } from './cars/cars.module';
 import { HostsModule } from './hosts/hosts.module';
 import { BookingsModule } from './bookings/bookings.module';
-import * as dotenv from 'dotenv';
 import { User } from './users/entities/user.entity';
 import { Host } from './hosts/entities/host.entity';
 import { DataSource } from 'typeorm';
@@ -14,11 +13,25 @@ import { AuthModule } from './auth/auth.module';
 import { UtilsModule } from './utils/utils.module';
 import { UserSigninLog } from './users/entities/user-signin-log.entity';
 import { HostSigninLog } from './hosts/entities/host-signin.log.entity';
-
-dotenv.config();
+import { ConfigModule } from '@nestjs/config';
+import * as Joi from 'joi';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.test',
+      ignoreEnvFile: process.env.NODE_ENV === 'prod',
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string().valid('dev', 'prod', 'test').required(),
+        DB_HOST: Joi.string().required(),
+        DB_PORT: Joi.string().required(),
+        DB_USERNAME: Joi.string().required(),
+        DB_PASSWORD: Joi.string().required(),
+        DB_DATABASE: Joi.string().required(),
+        SECRET_KEY: Joi.string().required(),
+      }),
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST,
@@ -33,6 +46,7 @@ dotenv.config();
       logging: true,
       keepConnectionAlive: true,
     }),
+
     UsersModule,
     CarsModule,
     HostsModule,
@@ -46,6 +60,3 @@ dotenv.config();
 export class AppModule {
   constructor(private datasource: DataSource) {}
 }
-
-//dotenv말고 nest config 확인해보기
-//typeorm 설정도 서비스가 커지면 별도의 파일로 빼서 typeorm.config로 작성함
