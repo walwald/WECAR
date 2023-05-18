@@ -46,7 +46,6 @@ import * as Joi from 'joi';
       logging: true,
       keepConnectionAlive: true,
     }),
-
     UsersModule,
     CarsModule,
     HostsModule,
