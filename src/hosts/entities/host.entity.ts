@@ -1,44 +1,11 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { HostSigninLog } from './host-signin.log.entity';
+import { BaseUser } from 'src/users/entities/base-user.entity';
 
 @Entity('hosts')
-export class Host {
+export class Host extends BaseUser {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({ nullable: false })
-  email: string;
-
-  @Column({ nullable: false })
-  password: string;
-
-  @Column({ name: 'password_salt' })
-  passwordSalt: string;
-
-  @Column({ name: 'refresh_token', nullable: true })
-  refreshToken: string;
-
-  @Column({ nullable: false })
-  name: string;
-
-  @Column({ name: 'phone_number', unique: true, nullable: false })
-  phoneNumber: string;
-
-  @Column({ name: 'marketing_agreement' })
-  marketingAgreement: boolean;
-
-  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
-  updatedAt: Date;
 
   @OneToMany(() => HostSigninLog, (signinLog) => signinLog.host)
   signinLogs: HostSigninLog[];

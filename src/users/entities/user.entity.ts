@@ -1,35 +1,11 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { UserSigninLog } from './user-signin.log.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { UserSigninLog } from './user-signin-log.entity';
+import { BaseUser } from './base-user.entity';
 
 @Entity('users')
-export class User {
+export class User extends BaseUser {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({ nullable: false, unique: true })
-  email: string;
-
-  @Column({ nullable: false })
-  password: string;
-
-  @Column({ name: 'password_salt' })
-  passwordSalt: string;
-
-  @Column({ name: 'refresh_token', nullable: true })
-  refreshToken: string;
-
-  @Column({ nullable: false })
-  name: string;
-
-  @Column({ name: 'phone_number', unique: true, nullable: false })
-  phoneNumber: string;
 
   @Column({ name: 'drviers_license_number', unique: true, nullable: false })
   driversLicenseNumber: string;
@@ -37,15 +13,10 @@ export class User {
   @Column({ nullable: false })
   birthday: Date;
 
-  @Column({ name: 'marketing_agreement' })
-  marketingAgreement: boolean;
-
-  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
-  updatedAt: Date;
-
   @OneToMany(() => UserSigninLog, (signinLog) => signinLog.user)
   signinLogs: UserSigninLog[];
+
+  //password class를 extend 해서 메서드 상속받기
 }
+
+//로그인 history 저장 > 바로 save 가능할 듯?

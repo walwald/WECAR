@@ -1,11 +1,12 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { AuthService } from '../auth.service';
-import { Payload } from './payload.interface';
+import AuthService from '../auth.service';
 import { Request } from 'express';
+import { Payload } from '../dto';
 
 //파일 분리 user, host
+//다 분리하고 index 만들기
 
 @Injectable()
 export class UserAtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
@@ -53,7 +54,7 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
     });
   }
 
-  //
+  //구조분해 할당
   async validate(req: Request, payload: Payload) {
     const [, refreshToken] = req.get('authorization').split('Bearer ');
 

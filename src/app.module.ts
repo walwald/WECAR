@@ -11,6 +11,9 @@ import { User } from './users/entities/user.entity';
 import { Host } from './hosts/entities/host.entity';
 import { DataSource } from 'typeorm';
 import { AuthModule } from './auth/auth.module';
+import { UtilsModule } from './utils/utils.module';
+import { UserSigninLog } from './users/entities/user-signin-log.entity';
+import { HostSigninLog } from './hosts/entities/host-signin.log.entity';
 
 dotenv.config();
 
@@ -23,7 +26,7 @@ dotenv.config();
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [User, Host],
+      entities: [User, Host, UserSigninLog, HostSigninLog],
       synchronize: true,
       autoLoadEntities: true,
       charset: 'utf8mb4',
@@ -35,6 +38,7 @@ dotenv.config();
     HostsModule,
     BookingsModule,
     AuthModule,
+    UtilsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -44,3 +48,4 @@ export class AppModule {
 }
 
 //dotenv말고 nest config 확인해보기
+//typeorm 설정도 서비스가 커지면 별도의 파일로 빼서 typeorm.config로 작성함
