@@ -15,8 +15,6 @@ export class User extends BaseUser {
 
   @OneToMany(() => UserSigninLog, (signinLog) => signinLog.user)
   signinLogs: UserSigninLog[];
-
-  //password class를 extend 해서 메서드 상속받기
 }
-
+//password class를 extend 해서 메서드 상속받기
 //로그인 history 저장 > 바로 save 가능할 듯?
