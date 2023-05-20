@@ -30,8 +30,8 @@ export class HostsService {
     return host;
   }
 
-  async signup(userData: SignupHostDto): Promise<Tokens> {
-    const { name, phoneNumber, email, password, marketingAgreement } = userData;
+  async signup(hostData: SignupHostDto): Promise<Tokens> {
+    const { phoneNumber, email } = hostData;
 
     const duplicateHost: Host = await this.hostRepository.findOne({
       where: [{ phoneNumber }, { email }],
@@ -40,17 +40,15 @@ export class HostsService {
     if (duplicateHost)
       throw new UnauthorizedException(`Duplicate Email or Phone Number`);
 
-    const newHost = new Host();
+    const newHost = this.hostRepository.create(hostData);
+    newHost.updatePassword(newHost.password);
 
-    newHost.phoneNumber = phoneNumber;
-    newHost.email = email;
-    newHost.name = name;
-    newHost.marketingAgreement = marketingAgreement;
-    newHost.updatePassword(password);
+    const tokens = this.utilsService.createTokens(newHost.id, newHost.name);
+    newHost.refreshToken = tokens.refreshToken;
 
     await this.hostRepository.save(newHost);
 
-    return this.utilsService.createTokens(newHost.id, newHost.name);
+    return { ...tokens };
   }
 
   async signin(

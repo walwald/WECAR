@@ -32,15 +32,7 @@ export class UsersService {
 
   //주석 작성 메서드용 주석 JS Doc
   async signup(userData: SignupUserDto): Promise<Tokens> {
-    const {
-      name,
-      phoneNumber,
-      email,
-      driversLicenseNumber,
-      password,
-      birthday,
-      marketingAgreement,
-    } = userData;
+    const { phoneNumber, email, driversLicenseNumber } = userData;
 
     const duplicateUser: User = await this.userRepository.findOne({
       where: [{ phoneNumber }, { email }, { driversLicenseNumber }],
@@ -51,19 +43,15 @@ export class UsersService {
         `Duplicate Email, Phone Number, or Dirver's License Number`,
       );
 
-    const newUser = new User();
+    const newUser = this.userRepository.create(userData);
+    newUser.updatePassword(newUser.password);
 
-    newUser.phoneNumber = phoneNumber;
-    newUser.birthday = birthday;
-    newUser.driversLicenseNumber = driversLicenseNumber;
-    newUser.email = email;
-    newUser.name = name;
-    newUser.marketingAgreement = marketingAgreement;
-    newUser.updatePassword(password);
+    const tokens = this.utilsService.createTokens(newUser.id, newUser.name);
+    newUser.refreshToken = tokens.refreshToken;
 
     await this.userRepository.save(newUser);
 
-    return this.utilsService.createTokens(newUser.id, newUser.name);
+    return { ...tokens };
   }
 
   //subscriber - user가 insert되면 다음 절차가 next 로그 저장 바로, afterupdate 같은 거 쓸 수 있음 afterinsert

@@ -15,6 +15,7 @@ import { UserSigninLog } from './users/entities/user-signin-log.entity';
 import { HostSigninLog } from './hosts/entities/host-signin.log.entity';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
+import { Brand, CarModel, CarType, EngineSize } from './cars/entities';
 
 @Module({
   imports: [
@@ -39,7 +40,16 @@ import * as Joi from 'joi';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [User, Host, UserSigninLog, HostSigninLog],
+      entities: [
+        User,
+        Host,
+        UserSigninLog,
+        HostSigninLog,
+        CarModel,
+        Brand,
+        EngineSize,
+        CarType,
+      ],
       synchronize: true,
       autoLoadEntities: true,
       charset: 'utf8mb4',
