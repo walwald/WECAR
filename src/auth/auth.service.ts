@@ -17,10 +17,14 @@ export default class AuthService {
   ) {}
 
   async tokenValidateUser(payload: Payload): Promise<User | null> {
-    return this.userRepository.findOneBy({ id: payload.id });
+    return this.userRepository.findOne({
+      where: { id: payload.id, name: payload.name },
+    });
   }
 
   async tokenValidateHost(payload: Payload): Promise<Host | null> {
-    return this.hostRepository.findOneBy({ id: payload.id });
+    return this.hostRepository.findOne({
+      where: { id: payload.id, name: payload.name },
+    });
   }
 }
