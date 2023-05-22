@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import { Payload, Tokens } from 'src/auth/dto';
 
 @Injectable()
 export class UtilsService {
-  constructor(public readonly jwtService: JwtService) {}
+  constructor(
+    public readonly jwtService: JwtService,
+    readonly config: ConfigService,
+  ) {}
 
   static hashPassword(password: string, salt: string): string {
     return crypto

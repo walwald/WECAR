@@ -22,6 +22,14 @@ export class HostsService {
     private readonly utilsService: UtilsService,
   ) {}
 
+  async findOneById(id: number): Promise<Host | null> {
+    const host = await this.hostRepository.findOneBy({ id });
+    if (!host) {
+      throw new NotFoundException(`Host with Id ${id} not found`);
+    }
+    return host;
+  }
+
   async findOneByEmail(email: string): Promise<Host | null> {
     const host = await this.hostRepository.findOneBy({ email });
     if (!host) {

@@ -3,11 +3,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Brand } from './brand.entity';
 import { EngineSize } from './enginesize.entity';
 import { CarType } from './car-type.entity';
+import { HostCar } from './host-car.entity';
 
 @Entity('car_models')
 export class CarModel {
@@ -32,6 +34,9 @@ export class CarModel {
   })
   @JoinColumn()
   carType: CarType;
+
+  @OneToMany(() => HostCar, (hostCar) => hostCar.carModel)
+  hostCars: HostCar[];
 
   @Column()
   capacity: number;

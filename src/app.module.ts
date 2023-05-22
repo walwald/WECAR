@@ -6,16 +6,11 @@ import { UsersModule } from './users/users.module';
 import { CarsModule } from './cars/cars.module';
 import { HostsModule } from './hosts/hosts.module';
 import { BookingsModule } from './bookings/bookings.module';
-import { User } from './users/entities/user.entity';
-import { Host } from './hosts/entities/host.entity';
 import { DataSource } from 'typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UtilsModule } from './utils/utils.module';
-import { UserSigninLog } from './users/entities/user-signin-log.entity';
-import { HostSigninLog } from './hosts/entities/host-signin.log.entity';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
-import { Brand, CarModel, CarType, EngineSize } from './cars/entities';
 
 @Module({
   imports: [
@@ -40,16 +35,7 @@ import { Brand, CarModel, CarType, EngineSize } from './cars/entities';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [
-        User,
-        Host,
-        UserSigninLog,
-        HostSigninLog,
-        CarModel,
-        Brand,
-        EngineSize,
-        CarType,
-      ],
+      entities: [__dirname + '/**/entities/*.entity.ts'],
       synchronize: true,
       autoLoadEntities: true,
       charset: 'utf8mb4',

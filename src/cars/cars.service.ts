@@ -1,8 +1,21 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotAcceptableException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Brand, CarModel, CarType, EngineSize } from './entities';
-import { NewModelDto } from './entities/dto/new-model.dto';
+import {
+  Brand,
+  CarModel,
+  CarType,
+  EngineSize,
+  FuelType,
+  HostCar,
+} from './entities';
+import { NewModelDto } from './dto/new-model.dto';
+import { HostsService } from 'src/hosts/hosts.service';
+import { NewHostCarDto } from './dto/new-host-car.dto';
 
 @Injectable()
 export class CarsService {
@@ -15,6 +28,11 @@ export class CarsService {
     private engineSizeRepository: Repository<EngineSize>,
     @InjectRepository(CarType)
     private carTypeRepository: Repository<CarType>,
+    @InjectRepository(HostCar)
+    private hostCarRepository: Repository<HostCar>,
+    @InjectRepository(FuelType)
+    private fuelTypeRepository: Repository<FuelType>,
+    private hostsService: HostsService,
   ) {}
 
   registerNewModel(newModels: NewModelDto[]): Promise<CarModel[]> {
@@ -83,5 +101,36 @@ export class CarsService {
     return this.carModelsRepository.find({
       relations: ['brand', 'engineSize', 'carType'],
     });
+  }
+
+  async registerNewHostCar(
+    newHostCar: NewHostCarDto,
+    hostId: number,
+  ): Promise<HostCar> {
+    const isExisting = await this.hostCarRepository.findOneBy({
+      carNumber: newHostCar.carNumber,
+    });
+
+    if (isExisting) {
+      throw new NotAcceptableException('Duplicate Car Number');
+    }
+
+    const host = await this.hostsService.findOneById(hostId);
+    const carModel = await this.carModelsRepository.findOneBy({
+      id: newHostCar.carModel,
+    });
+    const fuelType = await this.fuelTypeRepository.findOneBy({
+      type: newHostCar.fuelType,
+    });
+
+    const newCar = this.hostCarRepository.create({
+      ...newHostCar,
+      fuelType,
+      carModel,
+      host,
+    });
+
+    await this.hostCarRepository.save(newCar);
+    return newCar;
   }
 }

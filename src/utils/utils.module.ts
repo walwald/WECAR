@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { UtilsService } from './utils.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AwsService } from './aws.service';
+import { UtilsController } from './utils.controller';
 
 @Module({
   imports: [
@@ -16,7 +18,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
   ],
   exports: [UtilsService],
-  controllers: [],
-  providers: [UtilsService],
+  controllers: [UtilsController],
+  providers: [UtilsService, AwsService],
 })
 export class UtilsModule {}
