@@ -10,7 +10,7 @@ import { SignupUserDto } from './dto/signup.user.dto';
 import { UtilsService } from 'src/utils/utils.service';
 import { SigninAuthDto } from 'src/auth/dto/signin-auth.dto';
 import { UserSigninLog } from './entities/user-signin-log.entity';
-import { ReqUser, Tokens } from 'src/auth/dto';
+import { ReqUser, Tokens } from 'src/auth/types';
 
 @Injectable()
 export class UsersService {

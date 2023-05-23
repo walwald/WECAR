@@ -12,15 +12,14 @@ import {
 import { CarModel } from './car-model.entity';
 import { Host } from 'src/hosts/entities/host.entity';
 import { FuelType } from './fuel-type.entity';
-import { FileUrl } from 'src/utils/entities/file-url.entity';
-import Joi from 'joi';
+import { File } from 'src/utils/entities/file.entity';
 
 @Entity('host_cars')
 export class HostCar {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => Host, (host) => host.car, { onDelete: 'SET NULL' })
+  @OneToOne(() => Host, { onDelete: 'SET NULL' })
   @JoinColumn()
   host: Host;
 
@@ -48,8 +47,8 @@ export class HostCar {
   @Column('simple-array')
   options: string[];
 
-  @OneToMany(() => FileUrl, (fileUrl) => fileUrl.hostCar)
-  fileUrls: FileUrl['url'][];
+  @OneToMany(() => File, (File) => File.hostCar)
+  files: File[];
   //될 지 모르겠다
 
   @Column({ name: 'start_date' })

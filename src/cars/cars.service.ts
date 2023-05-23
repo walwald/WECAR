@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, FindOperator, Repository } from 'typeorm';
 import {
   Brand,
   CarModel,
@@ -16,6 +16,8 @@ import {
 import { NewModelDto } from './dto/new-model.dto';
 import { HostsService } from 'src/hosts/hosts.service';
 import { NewHostCarDto } from './dto/new-host-car.dto';
+import { File } from 'src/utils/entities/file.entity';
+import { FileDto } from './dto/file.dto';
 
 @Injectable()
 export class CarsService {
@@ -32,6 +34,8 @@ export class CarsService {
     private hostCarRepository: Repository<HostCar>,
     @InjectRepository(FuelType)
     private fuelTypeRepository: Repository<FuelType>,
+    @InjectRepository(File)
+    private fileRepository: Repository<File>,
     private hostsService: HostsService,
   ) {}
 
@@ -105,19 +109,21 @@ export class CarsService {
 
   async registerNewHostCar(
     newHostCar: NewHostCarDto,
+    files: FileDto[],
     hostId: number,
   ): Promise<HostCar> {
-    const isExisting = await this.hostCarRepository.findOneBy({
-      carNumber: newHostCar.carNumber,
+    const host = await this.hostsService.findOneById(hostId);
+    const isExisting = await this.hostCarRepository.findOne({
+      where: [{ carNumber: newHostCar.carNumber }, { host: { id: hostId } }],
+      relations: ['host'],
     });
 
     if (isExisting) {
-      throw new NotAcceptableException('Duplicate Car Number');
+      throw new NotAcceptableException('Duplicate Car Number of Host');
     }
 
-    const host = await this.hostsService.findOneById(hostId);
     const carModel = await this.carModelsRepository.findOneBy({
-      id: newHostCar.carModel,
+      name: newHostCar.carModel,
     });
     const fuelType = await this.fuelTypeRepository.findOneBy({
       type: newHostCar.fuelType,
@@ -130,7 +136,18 @@ export class CarsService {
       host,
     });
 
+    const createdFiles = files.map((file) =>
+      this.fileRepository.create({ ...file, hostCar: newCar }),
+    );
+
+    newCar.files = createdFiles;
+    // createdFiles.map((file) => (file.hostCar = newCar));
+    await this.fileRepository.save(createdFiles);
     await this.hostCarRepository.save(newCar);
     return newCar;
+  }
+
+  deleteHostCar(hostId: number): Promise<DeleteResult> {
+    return this.hostCarRepository.delete({ host: { id: hostId } });
   }
 }

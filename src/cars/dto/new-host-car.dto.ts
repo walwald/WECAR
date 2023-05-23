@@ -11,9 +11,9 @@ export class NewHostCarDto {
   @IsNotEmpty()
   readonly carNumber: string;
 
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
-  carModel: number;
+  carModel: string;
   //carModer id 전달 가능?
 
   @IsString()
@@ -31,8 +31,8 @@ export class NewHostCarDto {
   @IsArray()
   readonly options: string[];
 
-  @IsArray()
-  readonly fileUrls: string[];
+  //   @IsArray()
+  //   readonly fileUrls: string[];
 
   @IsDateString()
   @IsNotEmpty()

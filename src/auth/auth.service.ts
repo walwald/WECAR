@@ -4,7 +4,7 @@ import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Host } from 'src/hosts/entities/host.entity';
 import { UtilsService } from 'src/utils/utils.service';
-import { Payload } from './dto';
+import { Payload } from './types';
 
 @Injectable()
 export default class AuthService {

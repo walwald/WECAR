@@ -10,7 +10,7 @@ import { SignupHostDto } from './dto/signup.host.dto';
 import { UtilsService } from 'src/utils/utils.service';
 import { SigninAuthDto } from 'src/auth/dto/signin-auth.dto';
 import { HostSigninLog } from './entities/host-signin.log.entity';
-import { ReqUser, Tokens } from 'src/auth/dto';
+import { ReqUser, Tokens } from 'src/auth/types';
 
 @Injectable()
 export class HostsService {

@@ -5,9 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Brand, CarModel, CarType, EngineSize } from './entities';
 import { HostCar } from './entities/host-car.entity';
 import { FuelType } from './entities/fuel-type.entity';
-import { FileUrl } from 'src/utils/entities/file-url.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { HostsModule } from 'src/hosts/hosts.module';
+import { File } from 'src/utils/entities/file.entity';
 
 @Module({
   imports: [
@@ -18,7 +18,7 @@ import { HostsModule } from 'src/hosts/hosts.module';
       CarType,
       HostCar,
       FuelType,
-      FileUrl,
+      File,
     ]),
     AuthModule,
     HostsModule,

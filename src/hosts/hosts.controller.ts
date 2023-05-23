@@ -3,7 +3,7 @@ import { HostsService } from './hosts.service';
 import { SignupHostDto } from './dto/signup.host.dto';
 import { SigninAuthDto } from 'src/auth/dto/signin-auth.dto';
 import { Request } from 'express';
-import { ReqUser, Tokens } from 'src/auth/dto';
+import { ReqUser, Tokens } from 'src/auth/types';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/utils/decorators/user.decorator';
 

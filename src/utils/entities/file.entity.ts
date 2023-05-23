@@ -9,15 +9,23 @@ import {
 } from 'typeorm';
 import { HostCar } from 'src/cars/entities';
 
-@Entity('file_urls')
-export class FileUrl {
+@Entity('files')
+export class File {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true, nullable: false })
+  @Column()
+  name: string;
+
+  @Column({ unique: true, nullable: false, length: 1000 })
   url: string;
 
-  @ManyToOne(() => HostCar, (hostCar) => hostCar.fileUrls)
+  @Column({ unique: true, nullable: false })
+  type: string;
+
+  @ManyToOne(() => HostCar, (hostCar) => hostCar.files, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   hostCar: HostCar;
 

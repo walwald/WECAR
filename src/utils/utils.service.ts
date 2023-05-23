@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
-import { Payload, Tokens } from 'src/auth/dto';
+import { Payload, Tokens } from 'src/auth/types';
 
 @Injectable()
 export class UtilsService {
