@@ -26,6 +26,7 @@ import * as Joi from 'joi';
         DB_PASSWORD: Joi.string().required(),
         DB_DATABASE: Joi.string().required(),
         SECRET_KEY: Joi.string().required(),
+        DB_DATESTRINGS: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({

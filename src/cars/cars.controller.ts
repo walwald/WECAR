@@ -5,17 +5,17 @@ import {
   Get,
   Param,
   Post,
+  Query,
   UseGuards,
+  ValidationPipe,
 } from '@nestjs/common';
 import { CarsService } from './cars.service';
 import { Brand, CarModel, HostCar } from './entities';
-import { NewModelDto } from './dto/new-model.dto';
 import { User } from 'src/utils/decorators/user.decorator';
 import { ReqUser } from 'src/auth/types';
 import { AuthGuard } from '@nestjs/passport';
-import { NewHostCarDto } from './dto/new-host-car.dto';
-import { FileDto } from './dto/file.dto';
 import { DeleteResult } from 'typeorm';
+import { CarFilterDto, FileDto, NewHostCarDto, NewModelDto } from './dto';
 
 @Controller('cars')
 export class CarsController {
@@ -60,5 +60,16 @@ export class CarsController {
   @UseGuards(AuthGuard('jwt-host'))
   deleteHostCar(@User() host: ReqUser): Promise<DeleteResult> {
     return this.carsService.deleteHostCar(host.id);
+  }
+
+  @Get('host')
+  @UseGuards(AuthGuard('jwt-host'))
+  getCarByHost(@User() host: ReqUser): Promise<HostCar> {
+    return this.carsService.getCarByHost(host.id);
+  }
+
+  @Get()
+  getHostCars(@Query() filter: CarFilterDto): Promise<HostCar[]> {
+    return this.carsService.getHostCars(filter);
   }
 }

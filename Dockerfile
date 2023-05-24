@@ -11,10 +11,11 @@ RUN npm install webpack
 RUN npm install mysql2 -save
 RUN npm install typeorm -save
 
+
 # 소스 코드 복사
 COPY . .
 
 # 앱 빌드
-
+RUN npm run build
 # 컨테이너 실행할 명령어
 CMD ["npm", "run", "start:dev"]

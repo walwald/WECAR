@@ -49,7 +49,6 @@ export class HostCar {
 
   @OneToMany(() => File, (File) => File.hostCar)
   files: File[];
-  //될 지 모르겠다
 
   @Column({ name: 'start_date' })
   startDate: Date;

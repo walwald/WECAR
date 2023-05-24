@@ -12,14 +12,15 @@ export class AwsService {
       secretAccessKey: this.config.get('SECRET_ACCESSKEY'),
     });
   }
-  async generateSignedUrl(): Promise<{ signedUrl: string }> {
+  async generateSignedUrl(): Promise<{ signedUrl: any }> {
     const s3 = new AWS.S3();
 
     return new Promise((resolve, reject) => {
       const s3Params = {
         Bucket: this.config.get('BUCKET'),
         Key: `${Date.now()}_${uuid()}`,
-        ACL: 'public-read',
+        Expires: 3600,
+        ACL: 'public-read-write',
       };
 
       s3.getSignedUrl('putObject', s3Params, (err, url) => {

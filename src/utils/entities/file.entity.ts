@@ -20,7 +20,7 @@ export class File {
   @Column({ unique: true, nullable: false, length: 1000 })
   url: string;
 
-  @Column({ unique: true, nullable: false })
+  @Column()
   type: string;
 
   @ManyToOne(() => HostCar, (hostCar) => hostCar.files, {
