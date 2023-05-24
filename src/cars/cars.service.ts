@@ -77,10 +77,12 @@ export class CarsService {
     return this.brandRepository.find();
   }
 
+  //pipe string>number
+  //relations > 문자열에서 object를 통해서 가져올 수 있게
   async getModelsByBrand(id: number) {
     const selectedBrand = await this.brandRepository.findOne({
       where: { id },
-      relations: ['carModels'],
+      relations: { carModels: true },
     });
 
     if (!selectedBrand) throw new NotFoundException('Invalid Brand Id');
@@ -119,6 +121,7 @@ export class CarsService {
       throw new NotAcceptableException('Duplicate Car Number or Host');
     }
 
+    //유효성 검사 함수는 따로 빼는 게 좋을 듯
     const carModel = await this.carModelsRepository.findOneBy({
       name: newHostCar.carModel,
     });
@@ -143,7 +146,7 @@ export class CarsService {
     );
 
     newCar.files = createdFiles;
-
+    //transaction 처리 필요
     await this.fileRepository.save(createdFiles);
     await this.hostCarRepository.save(newCar);
 
@@ -177,6 +180,8 @@ export class CarsService {
       .leftJoinAndSelect('carModel.engineSize', 'engineSize')
       .leftJoinAndSelect('carModel.carType', 'carType');
 
+    //pagenation 12개씩
+
     if (filter.address) {
       query.andWhere('hostCar.address LIKE :address', {
         address: `${filter.address}`,
@@ -202,19 +207,19 @@ export class CarsService {
     }
 
     if (filter.brand) {
-      query.andWhere('carModel.brand.name = :brand', {
+      query.andWhere('brand.name = :brand', {
         brand: `${filter.brand}`,
       });
     }
 
     if (filter.engineSize) {
-      query.andWhere('carModel.engineSize.size = :engineSize', {
+      query.andWhere('engineSize.size = :engineSize', {
         EngineSize: `${filter.engineSize}`,
       });
     }
 
     if (filter.carType) {
-      query.andWhere('carModel.carType.type = :carType', {
+      query.andWhere('carType.type = :carType', {
         carType: `${filter.carType}`,
       });
     }
@@ -243,9 +248,9 @@ export class CarsService {
       });
     }
 
-    if (filter.options) {
-      // console.log('**********filter.options:', filter.options);
-      // console.log('**********type of filter.Options:', typeof filter.options);
+    if (filter.options?.length > 0) {
+      console.log('**********filter.options:', filter.options);
+      console.log('**********type of filter.Options:', typeof filter.options);
       // query.andWhere(':option IN hostCar.options', {
       //   option: `${filter.options}`,
       // });

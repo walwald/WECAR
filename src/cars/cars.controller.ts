@@ -20,7 +20,7 @@ import { CarFilterDto, FileDto, NewHostCarDto, NewModelDto } from './dto';
 @Controller('cars')
 export class CarsController {
   constructor(private readonly carsService: CarsService) {}
-
+  //custon origin - header > bot 접근 막음
   @Get('brands')
   getBrandList(): Promise<Brand[]> {
     return this.carsService.getBrandList();
@@ -46,6 +46,8 @@ export class CarsController {
     return this.carsService.getModelInfo(id);
   }
 
+  //전체 dto 하나 추가
+  //받아오는 과정에서 구조분해 할당으로 받아올 수 있음, 인자 세 개 다
   @Post('host')
   @UseGuards(AuthGuard('jwt-host'))
   registerNewHostCar(

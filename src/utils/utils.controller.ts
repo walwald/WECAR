@@ -10,3 +10,5 @@ export class UtilsController {
     return this.awsService.generateSignedUrl();
   }
 }
+//common, shared
+//AWS 안에서도 분리될 수 있음
