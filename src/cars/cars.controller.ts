@@ -7,15 +7,15 @@ import {
   Post,
   Query,
   UseGuards,
-  ValidationPipe,
 } from '@nestjs/common';
 import { CarsService } from './cars.service';
-import { Brand, CarModel, HostCar } from './entities';
+import { Brand, CarModel, HostCar, Option } from './entities';
 import { User } from 'src/utils/decorators/user.decorator';
 import { ReqUser } from 'src/auth/types';
 import { AuthGuard } from '@nestjs/passport';
 import { DeleteResult } from 'typeorm';
-import { CarFilterDto, FileDto, NewHostCarDto, NewModelDto } from './dto';
+import { CarFilterDto, NewModelDto } from './dto';
+import { CarRegisterDto } from './dto/car-register.dto';
 
 @Controller('cars')
 export class CarsController {
@@ -46,16 +46,19 @@ export class CarsController {
     return this.carsService.getModelInfo(id);
   }
 
-  //전체 dto 하나 추가
-  //받아오는 과정에서 구조분해 할당으로 받아올 수 있음, 인자 세 개 다
+  @Post('options')
+  createOption(@Body() options: string[]): Promise<Option[]> {
+    return this.carsService.createOption(options);
+  }
+
   @Post('host')
   @UseGuards(AuthGuard('jwt-host'))
   registerNewHostCar(
-    @Body() requestBody: { newHostCar: NewHostCarDto; files: FileDto[] },
-    @User() host: ReqUser,
+    @Body()
+    { newHostCar, files }: CarRegisterDto,
+    @User() { id }: ReqUser,
   ): Promise<HostCar> {
-    const { newHostCar, files } = requestBody;
-    return this.carsService.registerNewHostCar(newHostCar, files, host.id);
+    return this.carsService.registerNewHostCar(newHostCar, files, id);
   }
 
   @Delete('host')
@@ -73,5 +76,10 @@ export class CarsController {
   @Get()
   getHostCars(@Query() filter: CarFilterDto): Promise<HostCar[]> {
     return this.carsService.getHostCars(filter);
+  }
+
+  @Get(':id')
+  getHostCarDetail(@Param('id') id: number): Promise<HostCar> {
+    return this.carsService.getHostCarDetail(id);
   }
 }

@@ -6,8 +6,8 @@ export class CarType {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'car_type', unique: true, nullable: false })
-  type: string;
+  @Column({ unique: true, nullable: false })
+  name: string;
 
   @OneToMany(() => CarModel, (carModel) => carModel.brand)
   carModels: CarModel[];

@@ -3,6 +3,8 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -13,6 +15,7 @@ import { CarModel } from './car-model.entity';
 import { Host } from 'src/hosts/entities/host.entity';
 import { FuelType } from './fuel-type.entity';
 import { File } from 'src/utils/entities/file.entity';
+import { Option } from './option.entity';
 
 @Entity('host_cars')
 export class HostCar {
@@ -44,8 +47,9 @@ export class HostCar {
   @Column({ name: 'price_per_day', nullable: false })
   pricePerDay: number;
 
-  @Column('simple-array')
-  options: string[];
+  @ManyToMany(() => Option)
+  @JoinTable()
+  options: Option[];
 
   @OneToMany(() => File, (File) => File.hostCar)
   files: File[];

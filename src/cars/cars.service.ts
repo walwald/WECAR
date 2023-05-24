@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, EntityManager, Repository } from 'typeorm';
 import {
   Brand,
   CarModel,
@@ -12,10 +12,11 @@ import {
   EngineSize,
   FuelType,
   HostCar,
+  Option,
 } from './entities';
-import { HostsService } from 'src/hosts/hosts.service';
 import { File } from 'src/utils/entities/file.entity';
 import { CarFilterDto, FileDto, NewHostCarDto, NewModelDto } from './dto';
+import { ValidationInfo } from './types/validation.interface';
 
 @Injectable()
 export class CarsService {
@@ -34,27 +35,26 @@ export class CarsService {
     private fuelTypeRepository: Repository<FuelType>,
     @InjectRepository(File)
     private fileRepository: Repository<File>,
-    private hostsService: HostsService,
+    @InjectRepository(Option)
+    private optionRepository: Repository<Option>,
+    private entityManager: EntityManager,
   ) {}
 
   registerNewModel(newModels: NewModelDto[]): Promise<CarModel[]> {
     const createdModels = newModels.map(async (newModel) => {
       const isExisting = await this.carModelsRepository.findOne({
         where: { name: newModel.name },
-        relations: ['brand', 'engineSize', 'carType'],
+        relations: { brand: true, engineSize: true, carType: true },
       });
       if (isExisting) {
         return isExisting;
       }
-      const brand = await this.brandRepository.findOneBy({
-        name: newModel.brand,
-      });
-      const engineSize = await this.engineSizeRepository.findOneBy({
-        size: newModel.engineSize,
-      });
-      const carType = await this.carTypeRepository.findOneBy({
-        type: newModel.carType,
-      });
+
+      const { brand, engineSize, carType } = await this.validateModelInfo(
+        newModel.brand,
+        newModel.engineSize,
+        newModel.carType,
+      );
 
       const createdModel = this.carModelsRepository.create({
         name: newModel.name,
@@ -73,12 +73,31 @@ export class CarsService {
     return Promise.all(createdModels);
   }
 
+  async validateModelInfo(
+    brandName: string,
+    engineSizeName: string,
+    carTypeName: string,
+  ): Promise<ValidationInfo> {
+    const brand = await this.brandRepository.findOneBy({
+      name: brandName,
+    });
+    const engineSize = await this.engineSizeRepository.findOneBy({
+      name: engineSizeName,
+    });
+    const carType = await this.carTypeRepository.findOneBy({
+      name: carTypeName,
+    });
+
+    if (!brand || !engineSize || !carType) {
+      throw new NotFoundException('Invalid Brand, Car Type, or Engine Size');
+    }
+    return { brand, engineSize, carType };
+  }
+
   getBrandList(): Promise<Brand[]> {
     return this.brandRepository.find();
   }
 
-  //pipe string>number
-  //relations > 문자열에서 object를 통해서 가져올 수 있게
   async getModelsByBrand(id: number) {
     const selectedBrand = await this.brandRepository.findOne({
       where: { id },
@@ -93,7 +112,7 @@ export class CarsService {
   async getModelInfo(id: number): Promise<CarModel> {
     const selectedModel = await this.carModelsRepository.findOne({
       where: { id },
-      relations: ['brand', 'engineSize', 'carType'],
+      relations: { brand: true, engineSize: true, carType: true },
     });
 
     if (!selectedModel) throw new NotFoundException('Invalid Car Model Id');
@@ -103,8 +122,46 @@ export class CarsService {
 
   getAllModels(): Promise<CarModel[]> {
     return this.carModelsRepository.find({
-      relations: ['brand', 'engineSize', 'carType'],
+      relations: { brand: true, engineSize: true, carType: true },
     });
+  }
+
+  async createOption(options: string[]): Promise<Option[]> {
+    const optionList = options.map((option) => {
+      const createdOption = this.optionRepository.create({ name: `${option}` });
+      this.optionRepository.save(createdOption);
+      return createdOption;
+    });
+
+    return Promise.all(optionList);
+  }
+
+  async validateHostCarInfo(
+    modelName: string,
+    fuelName: string,
+    optionArr: string[],
+  ): Promise<ValidationInfo> {
+    const carModel = await this.carModelsRepository.findOneBy({
+      name: `${modelName}`,
+    });
+
+    const fuelType = await this.fuelTypeRepository.findOneBy({
+      name: `${fuelName}`,
+    });
+
+    const options = await Promise.all(
+      optionArr.map(async (option) => {
+        const data = this.optionRepository.findOneBy({ name: option });
+        if (!data) throw new NotFoundException('Invalid Car Option');
+        return data;
+      }),
+    );
+
+    if (!carModel || !fuelType) {
+      throw new NotFoundException('Invalid Car Model or Fuel Type');
+    }
+
+    return { carModel, fuelType, options };
   }
 
   async registerNewHostCar(
@@ -121,35 +178,32 @@ export class CarsService {
       throw new NotAcceptableException('Duplicate Car Number or Host');
     }
 
-    //유효성 검사 함수는 따로 빼는 게 좋을 듯
-    const carModel = await this.carModelsRepository.findOneBy({
-      name: newHostCar.carModel,
-    });
-
-    const fuelType = await this.fuelTypeRepository.findOneBy({
-      type: newHostCar.fuelType,
-    });
-
-    if (!carModel || !fuelType) {
-      throw new NotFoundException('Invalid Car Model or Fuel Type');
-    }
+    const { carModel, fuelType, options } = await this.validateHostCarInfo(
+      newHostCar.carModel,
+      newHostCar.fuelType,
+      newHostCar.options,
+    );
 
     const newCar = this.hostCarRepository.create({
       ...newHostCar,
+      options,
       fuelType,
       carModel,
       host: { id: hostId },
     });
+
+    newCar.options = options;
 
     const createdFiles = files.map((file) =>
       this.fileRepository.create({ ...file, hostCar: newCar }),
     );
 
     newCar.files = createdFiles;
-    //transaction 처리 필요
-    await this.fileRepository.save(createdFiles);
-    await this.hostCarRepository.save(newCar);
 
+    await this.entityManager.transaction(async (entityManager) => {
+      await entityManager.save(createdFiles);
+      await entityManager.save(newCar);
+    });
     return newCar;
   }
 
@@ -159,28 +213,30 @@ export class CarsService {
 
   async getCarByHost(hostId: number): Promise<HostCar> {
     return this.hostCarRepository.findOne({
-      relations: [
-        'carModel',
-        'carModel.brand',
-        'carModel.carType',
-        'carModel.engineSize',
-        'fuelType',
-        'files',
-      ],
+      relations: {
+        carModel: { brand: true, carType: true, engineSize: true },
+        fuelType: true,
+        files: true,
+        options: true,
+      },
       where: { host: { id: hostId } },
     });
   }
 
   getHostCars(filter: CarFilterDto): Promise<HostCar[]> {
+    const limitNumber = 12;
+    const skip = filter.page ? (filter.page - 1) * limitNumber : 0;
+
     const query = this.hostCarRepository
       .createQueryBuilder('hostCar')
       .leftJoinAndSelect('hostCar.carModel', 'carModel')
       .leftJoinAndSelect('hostCar.fuelType', 'fuelType')
+      .leftJoinAndSelect('hostCar.options', 'option')
       .leftJoinAndSelect('carModel.brand', 'brand')
       .leftJoinAndSelect('carModel.engineSize', 'engineSize')
-      .leftJoinAndSelect('carModel.carType', 'carType');
-
-    //pagenation 12개씩
+      .leftJoinAndSelect('carModel.carType', 'carType')
+      .offset(skip)
+      .limit(limitNumber);
 
     if (filter.address) {
       query.andWhere('hostCar.address LIKE :address', {
@@ -249,35 +305,25 @@ export class CarsService {
     }
 
     if (filter.options?.length > 0) {
-      console.log('**********filter.options:', filter.options);
-      console.log('**********type of filter.Options:', typeof filter.options);
-      // query.andWhere(':option IN hostCar.options', {
-      //   option: `${filter.options}`,
-      // });
-      query.where(`FIND_IN_SET(:option, hostCar.options) > 0`, {
-        option: filter.options,
-      });
-      // filter.options.map(()=>.andWhere('hostCar.optoins IN :'))
-      // const joinedOptions = filter.options.join('%');
-      // console.log('**********joinedOptions:', joinedOptions);
-
-      // const parsedOptions = JSON.parse(filter.options);
-      // console.log('**********parsedOptions:', parsedOptions);
-      // console.log('**********type of parsedOptions:', typeof parsedOptions);
-      // const optionsArr = filter.options.split("',");
-      // const optionsArr = filter.options.split("','");
-      // query.andWhere(`ARRAY[?] <@ hostCar.options`).setParameters(optionsArr);
-      // query.andWhere(':options IN hostCar.options', {
-      //   options: `${filter.options}`,
-      // });
+      query.andWhere('option.name IN (:options)', { options: filter.options });
     }
-    //배열 변환 문제
-    // const cars = await carRepository
-    //   .createQueryBuilder('car')
-    //   .where(`ARRAY[${subset.map(() => '?').join(',')}] <@ car.options`)
-    //   .setParameters(subset)
-    //   .getMany();
 
     return query.getMany();
+  }
+
+  async getHostCarDetail(id: number): Promise<HostCar> {
+    const hostCar = await this.hostCarRepository.findOne({
+      relations: {
+        carModel: { brand: true, carType: true, engineSize: true },
+        fuelType: true,
+        files: true,
+        options: true,
+      },
+      where: { id },
+    });
+
+    if (!hostCar) throw new NotFoundException('Invalid hostCar Id');
+
+    return hostCar;
   }
 }

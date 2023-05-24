@@ -1,16 +1,18 @@
+import { Transform } from 'class-transformer';
 import {
   IsArray,
   IsDateString,
   IsNumber,
   IsOptional,
   IsString,
+  isArray,
 } from 'class-validator';
 
 export class CarFilterDto {
   @IsOptional()
   @IsString()
   readonly address: string;
-  //순서 중요
+
   @IsOptional()
   @IsDateString()
   readonly startDate: Date;
@@ -20,6 +22,7 @@ export class CarFilterDto {
   readonly endDate: Date;
 
   @IsOptional()
+  @Transform(({ value }) => parseInt(value))
   @IsNumber()
   readonly minCapacity: number;
 
@@ -40,18 +43,27 @@ export class CarFilterDto {
   readonly fuelType: string;
 
   @IsOptional()
+  @Transform(({ value }) => parseInt(value))
   @IsNumber()
   readonly minPrice: number;
 
   @IsOptional()
+  @Transform(({ value }) => parseInt(value))
   @IsNumber()
   readonly maxPrice: number;
 
   @IsOptional()
+  @Transform(({ value }) => parseInt(value))
   @IsNumber()
   readonly capacity: number;
 
-  //transform 단일이냐 배열이냐를 체크해서 배열로 치환
   @IsOptional()
+  @Transform(({ value }) => (!isArray(value) ? [value] : value))
+  @IsArray()
   readonly options: string[];
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber()
+  readonly page: number;
 }

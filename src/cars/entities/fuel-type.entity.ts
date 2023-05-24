@@ -6,8 +6,8 @@ export class FuelType {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'fuel_type', unique: true, nullable: false })
-  type: string;
+  @Column({ unique: true, nullable: false })
+  name: string;
 
   @OneToMany(() => HostCar, (hostCar) => hostCar.fuelType)
   hostCars: HostCar[];

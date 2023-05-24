@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { CarsService } from './cars.service';
 import { CarsController } from './cars.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Brand, CarModel, CarType, EngineSize } from './entities';
+import { Brand, CarModel, CarType, EngineSize, Option } from './entities';
 import { HostCar } from './entities/host-car.entity';
 import { FuelType } from './entities/fuel-type.entity';
 import { AuthModule } from 'src/auth/auth.module';
@@ -19,6 +19,7 @@ import { File } from 'src/utils/entities/file.entity';
       HostCar,
       FuelType,
       File,
+      Option,
     ]),
     AuthModule,
     HostsModule,
