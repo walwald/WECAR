@@ -232,11 +232,22 @@ export class CarsService {
       .leftJoinAndSelect('hostCar.carModel', 'carModel')
       .leftJoinAndSelect('hostCar.fuelType', 'fuelType')
       .leftJoinAndSelect('hostCar.options', 'option')
+      .leftJoinAndSelect('hostCar.files', 'file')
       .leftJoinAndSelect('carModel.brand', 'brand')
       .leftJoinAndSelect('carModel.engineSize', 'engineSize')
       .leftJoinAndSelect('carModel.carType', 'carType')
       .offset(skip)
-      .limit(limitNumber);
+      .limit(limitNumber)
+      .select([
+        'hostCar.id',
+        'hostCar.pricePerDay',
+        'hostCar.address',
+        'hostCar.startDate',
+        'hostCar.endDate',
+        'carModel.name',
+        'brand.name',
+        'file.url',
+      ]);
 
     if (filter.address) {
       query.andWhere('hostCar.address LIKE :address', {
