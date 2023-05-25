@@ -56,9 +56,9 @@ export class CarsController {
   registerNewHostCar(
     @Body()
     { newHostCar, files }: CarRegisterDto,
-    @User() { id }: ReqUser,
+    @User() { id: hostId }: ReqUser,
   ): Promise<HostCar> {
-    return this.carsService.registerNewHostCar(newHostCar, files, id);
+    return this.carsService.registerNewHostCar(newHostCar, files, hostId);
   }
 
   @Delete('host')

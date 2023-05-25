@@ -8,6 +8,7 @@ import { FuelType } from './entities/fuel-type.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { HostsModule } from 'src/hosts/hosts.module';
 import { File } from 'src/utils/entities/file.entity';
+import { Booking } from 'src/bookings/entities';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { File } from 'src/utils/entities/file.entity';
       FuelType,
       File,
       Option,
+      Booking,
     ]),
     AuthModule,
     HostsModule,

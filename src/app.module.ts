@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { UtilsModule } from './utils/utils.module';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
+import { BookingSubscriber } from './bookings/booking.subscriber';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import * as Joi from 'joi';
       charset: 'utf8mb4',
       logging: true,
       keepConnectionAlive: true,
+      subscribers: [BookingSubscriber],
     }),
     UsersModule,
     CarsModule,

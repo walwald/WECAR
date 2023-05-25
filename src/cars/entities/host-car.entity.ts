@@ -16,6 +16,7 @@ import { Host } from 'src/hosts/entities/host.entity';
 import { FuelType } from './fuel-type.entity';
 import { File } from 'src/utils/entities/file.entity';
 import { Option } from './option.entity';
+import { Booking } from 'src/bookings/entities';
 
 @Entity('host_cars')
 export class HostCar {
@@ -59,6 +60,9 @@ export class HostCar {
 
   @Column({ name: 'end_date' })
   endDate: Date;
+
+  @OneToMany(() => Booking, (booking) => booking.hostCar)
+  bookings: Booking[];
 
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;
