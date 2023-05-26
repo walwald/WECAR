@@ -333,16 +333,31 @@ export class CarsService {
   }
 
   async getHostCarDetail(id: number): Promise<HostCar> {
-    const hostCar = await this.hostCarRepository.findOne({
-      relations: {
-        carModel: { brand: true, carType: true, engineSize: true },
-        fuelType: true,
-        files: true,
-        options: true,
-        bookings: true,
-      },
-      where: { id },
-    });
+    const hostCar = await this.hostCarRepository
+      .createQueryBuilder('hostCar')
+      .leftJoinAndSelect('hostCar.host', 'host')
+      .leftJoinAndSelect('hostCar.carModel', 'carModel')
+      .leftJoinAndSelect('hostCar.fuelType', 'fuelType')
+      .leftJoinAndSelect('hostCar.options', 'option')
+      .leftJoinAndSelect('hostCar.files', 'file')
+      .leftJoinAndSelect('carModel.brand', 'brand')
+      .leftJoinAndSelect('carModel.engineSize', 'engineSize')
+      .leftJoinAndSelect('carModel.carType', 'carType')
+      .leftJoinAndSelect('hostCar.bookings', 'booking')
+      .select([
+        'hostCar',
+        'carModel',
+        'brand',
+        'engineSize',
+        'carType',
+        'fuelType',
+        'option',
+        'file',
+        'booking',
+        'host.name',
+      ])
+      .where('hostCar.id = :id', { id })
+      .getOne();
 
     if (!hostCar) throw new NotFoundException('Invalid hostCar Id');
 
