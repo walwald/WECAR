@@ -238,8 +238,8 @@ export class CarsService {
       .leftJoinAndSelect('carModel.engineSize', 'engineSize')
       .leftJoinAndSelect('carModel.carType', 'carType')
       .where('hostCar.status = true')
-      .offset(skip)
-      .limit(limitNumber)
+      .take(limitNumber)
+      .skip(skip)
       .select([
         'hostCar.id',
         'hostCar.pricePerDay',
@@ -249,6 +249,7 @@ export class CarsService {
         'carModel.name',
         'brand.name',
         'file.url',
+        'option.name',
       ]);
 
     if (filter.address) {
