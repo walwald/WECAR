@@ -234,7 +234,6 @@ export class CarsService {
       .leftJoinAndSelect('hostCar.options', 'option')
       .leftJoinAndSelect('hostCar.files', 'file')
       .leftJoin('hostCar.bookings', 'booking')
-      .leftJoin('booking.status', 'bookingstatus')
       .leftJoinAndSelect('carModel.brand', 'brand')
       .leftJoinAndSelect('carModel.engineSize', 'engineSize')
       .leftJoinAndSelect('carModel.carType', 'carType')
@@ -257,32 +256,24 @@ export class CarsService {
         address: `${filter.address}`,
       });
     }
-    //수정 필요
+
     if (filter.startDate) {
-      query
-        .andWhere('hostCar.startDate <= :startDate', {
-          startDate: `${filter.startDate}`,
-        })
-        .andWhere(
-          'booking.id IS NULL OR (bookingstatus.id != 1 AND booking.endDate < :startDate)',
-          {
-            startDate: `${filter.startDate}`,
-          },
-        )
-        .andWhere('booking.id IS NULL OR bookingstatus.id = 1');
+      query.andWhere('hostCar.startDate <= :startDate', {
+        startDate: `${filter.startDate}`,
+      });
+      // .andWhere('(booking.id IS NULL) OR (booking.endDate < :startDate)', {
+      //   startDate: `${filter.startDate}`,
+      // });
     }
-    //수정 필요 OR (bookingstatus.id = 1)bookingstatus.id = NOT(1))
+    //문제: 하나라도 해당하는 booking이 있으면 값이 나와버림
+
     if (filter.endDate) {
-      query
-        .andWhere('hostCar.endDate >= :endDate', {
-          endDate: `${filter.endDate}`,
-        })
-        .andWhere(
-          `(booking.id IS NULL) OR (booking.startDate > :endDate OR bookingstatus.id = 1)`,
-          {
-            endDate: `${filter.endDate}`,
-          },
-        );
+      query.andWhere('hostCar.endDate >= :endDate', {
+        endDate: `${filter.endDate}`,
+      });
+      // .andWhere('(booking.id IS NULL) OR (booking.startDate > :endDate)', {
+      //   endDate: `${filter.endDate}`,
+      // });
     }
 
     if (filter.minCapacity) {
