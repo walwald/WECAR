@@ -17,6 +17,7 @@ import {
 import { File } from 'src/utils/entities/file.entity';
 import { CarFilterDto, FileDto, NewHostCarDto, NewModelDto } from './dto';
 import { ValidationInfo } from './types/validation.interface';
+import { Booking } from 'src/bookings/entities';
 
 @Injectable()
 export class CarsService {
@@ -233,10 +234,10 @@ export class CarsService {
       .leftJoinAndSelect('hostCar.fuelType', 'fuelType')
       .leftJoinAndSelect('hostCar.options', 'option')
       .leftJoinAndSelect('hostCar.files', 'file')
-      .leftJoin('hostCar.bookings', 'booking')
       .leftJoinAndSelect('carModel.brand', 'brand')
       .leftJoinAndSelect('carModel.engineSize', 'engineSize')
       .leftJoinAndSelect('carModel.carType', 'carType')
+      .leftJoin('hostCar.bookings', 'booking')
       .where('hostCar.status = true')
       .take(limitNumber)
       .skip(skip)
@@ -249,7 +250,7 @@ export class CarsService {
         'carModel.name',
         'brand.name',
         'file.url',
-        'option.name',
+        'booking.id',
       ]);
 
     if (filter.address) {
@@ -258,24 +259,114 @@ export class CarsService {
       });
     }
 
-    if (filter.startDate) {
-      query.andWhere('hostCar.startDate <= :startDate', {
-        startDate: `${filter.startDate}`,
-      });
-      // .andWhere('(booking.id IS NULL) OR (booking.endDate < :startDate)', {
-      //   startDate: `${filter.startDate}`,
-      // });
+    if (filter.startDate || filter.endDate) {
+      const bookingCount = query
+        .createQueryBuilder()
+        .select('COUNT(*)')
+        .from(Booking, 'booking')
+        .leftJoin('hostCar', 'hostCar')
+        .where('booking.hostCarId = hostCar.id')
+        .getQuery();
+
+      console.log('여기는 sub-query: ', bookingCount);
+
+      // query.groupBy('hostCar.id').having(`(${bookingCount}) = COUNT(booking.id)`);
+
+      // query
+      //   .groupBy('hostCar.id')
+      //   .having(`(${bookingCount}) = COUNT(booking.id)`);
+      if (filter.startDate && filter.endDate) {
+        query
+          // .leftJoin(
+          //   'hostCar.bookings',
+          //   'booking',
+          //   '(booking.id IS NULL OR booking.endDate < :startDate OR booking.startDate > :endDate)',
+          //   {
+          //     startDate: `${filter?.startDate}`,
+          //     endDate: `${filter?.endDate}`,
+          //   },
+          // )
+          .andWhere(
+            'hostCar.startDate <= :startDate AND hostCar.endDate >= :startDate',
+            {
+              startDate: `${filter.startDate}`,
+            },
+          )
+          // .andWhere('hostCar.endDate >= :startDate', {
+          //   startDate: `${filter.startDate}`,
+          // })
+          .andWhere(
+            'hostCar.endDate >= :endDate AND hostCar.startDate <= :endDate',
+            {
+              endDate: `${filter.endDate}`,
+            },
+          )
+          // .andWhere('hostCar.startDate <= :endDate', {
+          //   endDate: `${filter.endDate}`,
+          // })
+          .andWhere(
+            '(booking.id IS NULL OR booking.endDate < :startDate OR booking.startDate > :endDate)',
+            {
+              startDate: `${filter?.startDate}`,
+              endDate: `${filter?.endDate}`,
+            },
+          );
+        //조건에 맞는 booking들만 select 되어서 조건에 맞는 하나 이상의 booking이 있는 경우 결과에 나타남
+      } else if (filter.startDate) {
+        console.log('여기는 else if startDate 안:', filter.startDate);
+        query
+          // .leftJoin(
+          //   'hostCar.bookings',
+          //   'booking',
+          //   '(booking.endDate < :startDate)',
+          //   {
+          //     startDate: `${filter?.startDate}`,
+          //   },
+          // )
+          .andWhere('hostCar.startDate <= :startDate', {
+            startDate: `${filter.startDate}`,
+          })
+          .andWhere('hostCar.endDate >= :startDate', {
+            startDate: `${filter.startDate}`,
+          })
+          .andWhere('(booking.id IS NULL OR booking.endDate < :startDate)', {
+            startDate: `${filter.startDate}`,
+          })
+          .groupBy('hostCar.id')
+          .having(`(${bookingCount}) = COUNT(booking.id)`);
+      } else {
+        console.log('여기는 endDate else 안:', filter.endDate);
+        query
+          // .leftJoin(
+          //   'hostCar.bookings',
+          //   'booking',
+          //   '(booking.id IS NULL OR booking.startDate > :endDate)',
+          //   {
+          //     endDate: `${filter?.endDate}`,
+          //   },
+          // )
+          .andWhere('hostCar.endDate >= :endDate', {
+            endDate: `${filter.endDate}`,
+          })
+          .andWhere('hostCar.startDate <= :endDate', {
+            endDate: `${filter.endDate}`,
+          })
+          .andWhere('(booking.id IS NULL OR booking.startDate > :endDate)', {
+            endDate: `${filter.endDate}`,
+          });
+      }
     }
     //문제: 하나라도 해당하는 booking이 있으면 값이 나와버림
 
-    if (filter.endDate) {
-      query.andWhere('hostCar.endDate >= :endDate', {
-        endDate: `${filter.endDate}`,
-      });
-      // .andWhere('(booking.id IS NULL) OR (booking.startDate > :endDate)', {
-      //   endDate: `${filter.endDate}`,
-      // });
-    }
+    // if (filter.endDate) {
+    //   query
+    //     .andWhere('hostCar.endDate >= :endDate', {
+    //       endDate: `${filter.endDate}`,
+    //     })
+    //     .andWhere('(booking.id IS NULL) OR (booking.startDate > :endDate)', {
+    //       endDate: `${filter.endDate}`,
+    //     });
+    // }
 
     if (filter.minCapacity) {
       query.andWhere('carModel.capacity >= :minCapa', {
