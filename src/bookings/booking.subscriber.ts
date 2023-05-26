@@ -11,7 +11,7 @@ export class BookingSubscriber implements EntitySubscriberInterface<Booking> {
     return Booking;
   }
 
-  async beforeUpdate(event: UpdateEvent<Booking>) {
+  async afterUpdate(event: UpdateEvent<Booking>) {
     const { uuid, status } = event.entity;
 
     const logEntry = new BookingLog();

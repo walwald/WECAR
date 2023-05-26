@@ -64,6 +64,9 @@ export class HostCar {
   @OneToMany(() => Booking, (booking) => booking.hostCar)
   bookings: Booking[];
 
+  @Column({ default: true })
+  status: boolean;
+
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;
 

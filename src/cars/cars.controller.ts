@@ -14,8 +14,7 @@ import { User } from 'src/utils/decorators/user.decorator';
 import { ReqUser } from 'src/auth/types';
 import { AuthGuard } from '@nestjs/passport';
 import { DeleteResult } from 'typeorm';
-import { CarFilterDto, NewModelDto } from './dto';
-import { CarRegisterDto } from './dto/car-register.dto';
+import { CarFilterDto, CarRegisterDto, NewModelDto } from './dto';
 
 @Controller('cars')
 export class CarsController {

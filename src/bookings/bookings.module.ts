@@ -4,9 +4,12 @@ import { BookingsService } from './bookings.service';
 import { Booking, BookingLog } from './entities';
 import { BookingStatus } from './entities/booking-status.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { HostCar } from 'src/cars/entities';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Booking, BookingStatus, BookingLog])],
+  imports: [
+    TypeOrmModule.forFeature([Booking, BookingStatus, BookingLog, HostCar]),
+  ],
   controllers: [BookingsController],
   providers: [BookingsService],
 })

@@ -1,7 +1,11 @@
+import { IsArray, IsObject } from 'class-validator';
 import { FileDto } from './file.dto';
 import { NewHostCarDto } from './new-host-car.dto';
 
 export class CarRegisterDto {
-  readonly newHostCar: NewHostCarDto;
-  readonly files: FileDto[];
+  @IsObject()
+  newHostCar: NewHostCarDto;
+
+  @IsArray()
+  files: FileDto[];
 }
