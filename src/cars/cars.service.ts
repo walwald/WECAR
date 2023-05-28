@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotAcceptableException,
   NotFoundException,
@@ -224,20 +225,24 @@ export class CarsService {
     });
   }
 
-  getHostCars(filter: CarFilterDto): Promise<HostCar[]> {
+  async getHostCars(filter: CarFilterDto): Promise<HostCar[]> {
     const limitNumber = 12;
     const skip = filter.page ? (filter.page - 1) * limitNumber : 0;
 
+    if (!filter.startDate !== !filter.endDate)
+      throw new BadRequestException('One of Start date or End date is Missnig');
+    //조건에 맞는 booking들만 select 되어서 조건에 맞는 하나 이상의 booking이 있는 경우 결과에 나타남
+    //문제: 하나라도 해당하는 booking이 있으면 값이 나와버림
     const query = this.hostCarRepository
       .createQueryBuilder('hostCar')
       .leftJoinAndSelect('hostCar.carModel', 'carModel')
       .leftJoinAndSelect('hostCar.fuelType', 'fuelType')
       .leftJoinAndSelect('hostCar.options', 'option')
+      .leftJoinAndSelect('hostCar.bookings', 'booking')
       .leftJoinAndSelect('hostCar.files', 'file')
       .leftJoinAndSelect('carModel.brand', 'brand')
       .leftJoinAndSelect('carModel.engineSize', 'engineSize')
       .leftJoinAndSelect('carModel.carType', 'carType')
-      .leftJoin('hostCar.bookings', 'booking')
       .where('hostCar.status = true')
       .take(limitNumber)
       .skip(skip)
@@ -250,123 +255,26 @@ export class CarsService {
         'carModel.name',
         'brand.name',
         'file.url',
-        'booking.id',
+        'booking',
       ]);
 
     if (filter.address) {
       query.andWhere('hostCar.address LIKE :address', {
-        address: `${filter.address}`,
+        address: `%${filter.address}%`,
       });
     }
-
-    if (filter.startDate || filter.endDate) {
-      const bookingCount = query
-        .createQueryBuilder()
-        .select('COUNT(*)')
-        .from(Booking, 'booking')
-        .leftJoin('hostCar', 'hostCar')
-        .where('booking.hostCarId = hostCar.id')
-        .getQuery();
-
-      console.log('여기는 sub-query: ', bookingCount);
-
-      // query.groupBy('hostCar.id').having(`(${bookingCount}) = COUNT(booking.id)`);
-
-      // query
-      //   .groupBy('hostCar.id')
-      //   .having(`(${bookingCount}) = COUNT(booking.id)`);
-      if (filter.startDate && filter.endDate) {
-        query
-          // .leftJoin(
-          //   'hostCar.bookings',
-          //   'booking',
-          //   '(booking.id IS NULL OR booking.endDate < :startDate OR booking.startDate > :endDate)',
-          //   {
-          //     startDate: `${filter?.startDate}`,
-          //     endDate: `${filter?.endDate}`,
-          //   },
-          // )
-          .andWhere(
-            'hostCar.startDate <= :startDate AND hostCar.endDate >= :startDate',
-            {
-              startDate: `${filter.startDate}`,
-            },
-          )
-          // .andWhere('hostCar.endDate >= :startDate', {
-          //   startDate: `${filter.startDate}`,
-          // })
-          .andWhere(
-            'hostCar.endDate >= :endDate AND hostCar.startDate <= :endDate',
-            {
-              endDate: `${filter.endDate}`,
-            },
-          )
-          // .andWhere('hostCar.startDate <= :endDate', {
-          //   endDate: `${filter.endDate}`,
-          // })
-          .andWhere(
-            '(booking.id IS NULL OR booking.endDate < :startDate OR booking.startDate > :endDate)',
-            {
-              startDate: `${filter?.startDate}`,
-              endDate: `${filter?.endDate}`,
-            },
-          );
-        //조건에 맞는 booking들만 select 되어서 조건에 맞는 하나 이상의 booking이 있는 경우 결과에 나타남
-      } else if (filter.startDate) {
-        console.log('여기는 else if startDate 안:', filter.startDate);
-        query
-          // .leftJoin(
-          //   'hostCar.bookings',
-          //   'booking',
-          //   '(booking.endDate < :startDate)',
-          //   {
-          //     startDate: `${filter?.startDate}`,
-          //   },
-          // )
-          .andWhere('hostCar.startDate <= :startDate', {
-            startDate: `${filter.startDate}`,
-          })
-          .andWhere('hostCar.endDate >= :startDate', {
-            startDate: `${filter.startDate}`,
-          })
-          .andWhere('(booking.id IS NULL OR booking.endDate < :startDate)', {
-            startDate: `${filter.startDate}`,
-          })
-          .groupBy('hostCar.id')
-          .having(`(${bookingCount}) = COUNT(booking.id)`);
-      } else {
-        console.log('여기는 endDate else 안:', filter.endDate);
-        query
-          // .leftJoin(
-          //   'hostCar.bookings',
-          //   'booking',
-          //   '(booking.id IS NULL OR booking.startDate > :endDate)',
-          //   {
-          //     endDate: `${filter?.endDate}`,
-          //   },
-          // )
-          .andWhere('hostCar.endDate >= :endDate', {
-            endDate: `${filter.endDate}`,
-          })
-          .andWhere('hostCar.startDate <= :endDate', {
-            endDate: `${filter.endDate}`,
-          })
-          .andWhere('(booking.id IS NULL OR booking.startDate > :endDate)', {
-            endDate: `${filter.endDate}`,
-          });
-      }
+    //bookings는 전부 꺼내서 처리하기
+    if (filter.startDate && filter.endDate) {
+      query
+        .andWhere(
+          'DATE_FORMAT(hostCar.startDate, "%Y-%m-%d") <= :startDate AND DATE_FORMAT(hostCar.endDate, "%Y-%m-%d") >= :startDate',
+          { startDate: `${filter.startDate}` },
+        )
+        .andWhere(
+          'DATE_FORMAT(hostCar.endDate, "%Y-%m-%d") >= :endDate AND DATE_FORMAT(hostCar.startDate, "%Y-%m-%d") <= :endDate',
+          { endDate: `${filter.endDate}` },
+        );
     }
-    //문제: 하나라도 해당하는 booking이 있으면 값이 나와버림
-
-    // if (filter.endDate) {
-    //   query
-    //     .andWhere('hostCar.endDate >= :endDate', {
-    //       endDate: `${filter.endDate}`,
-    //     })
-    //     .andWhere('(booking.id IS NULL) OR (booking.startDate > :endDate)', {
-    //       endDate: `${filter.endDate}`,
-    //     });
-    // }
 
     if (filter.minCapacity) {
       query.andWhere('carModel.capacity >= :minCapa', {
@@ -420,7 +328,50 @@ export class CarsService {
       query.andWhere('option.name IN (:options)', { options: filter.options });
     }
 
-    return query.getMany();
+    let filteredCars = await query.getMany();
+
+    //filter ver. 로직에는 문제 없는 듯 근데 날짜가 문제?
+    // .andWhere(
+    //   '(DATE_FORMAT(booking.endDate, "%Y-%m-%d") < :startDate OR DATE_FORMAT(booking.startDate, "%Y-%m-%d") > :endDate)',
+    //   { startDate: `${filter.startDate}`, endDate: `${filter.endDate}` },
+    // )
+    // .orWhere('booking.id IS NULL');
+
+    //car.bookings에 대해 for Each 돌리기 true만 있어야...근데 length가 0이면?
+    if (filter.startDate && filter.endDate) {
+      filteredCars = filteredCars.filter((car, index) => {
+        let result = true;
+        car.bookings.forEach((booking, indexing) => {
+          console.log(result, indexing);
+          const bookingStartDate = new Date(booking.startDate);
+          const bookingEndDate = new Date(booking.endDate);
+          const filterStartDate = new Date(filter.startDate);
+          const filterEndDate = new Date(filter.endDate);
+          console.log(
+            '변수들: ',
+            bookingStartDate,
+            bookingEndDate,
+            filterStartDate,
+            filterEndDate,
+          );
+          console.log(
+            '원본들: ',
+            booking.startDate,
+            booking.endDate,
+            filter.startDate,
+            filter.endDate,
+          );
+          result =
+            result &&
+            (bookingEndDate < filterStartDate ||
+              bookingStartDate > filterEndDate);
+          return result;
+        });
+        console.log(result, index);
+        return result;
+      });
+    }
+    return Promise.all(filteredCars);
   }
 
   async getHostCarDetail(id: number): Promise<HostCar> {
