@@ -3,11 +3,11 @@ import { IsDateString, IsNotEmpty, IsNumber } from 'class-validator';
 export class BookingDto {
   @IsDateString()
   @IsNotEmpty()
-  readonly startDate: Date;
+  readonly startDate: string;
 
   @IsDateString()
   @IsNotEmpty()
-  readonly endDate: Date;
+  readonly endDate: string;
 
   @IsNumber()
   @IsNotEmpty()
