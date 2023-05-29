@@ -18,6 +18,7 @@ import {
 import { File } from 'src/utils/entities/file.entity';
 import { CarFilterDto, FileDto, NewHostCarDto, NewModelDto } from './dto';
 import { ValidationInfo } from './types/validation.interface';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class CarsService {
@@ -287,19 +288,19 @@ export class CarsService {
     }
 
     if (filter.engineSize) {
-      query.andWhere('engineSize.size = :engineSize', {
-        EngineSize: `${filter.engineSize}`,
+      query.andWhere('engineSize.name = :engineSize', {
+        engineSize: `${filter.engineSize}`,
       });
     }
 
     if (filter.carType) {
-      query.andWhere('carType.type = :carType', {
+      query.andWhere('carType.name = :carType', {
         carType: `${filter.carType}`,
       });
     }
 
     if (filter.fuelType) {
-      query.andWhere('fuelType.type = :fuelType', {
+      query.andWhere('fuelType.name = :fuelType', {
         fuelType: `${filter.fuelType}`,
       });
     }
@@ -386,5 +387,17 @@ export class CarsService {
     if (!hostCar) throw new NotFoundException('Invalid hostCar Id');
 
     return hostCar;
+  }
+
+  @Cron('0 0 * * *')
+  async updateCarStatus() {
+    const allCars = await this.hostCarRepository.find();
+    const now = new Date();
+    allCars.forEach((car) => {
+      const carEndDate = new Date(car.endDate);
+      if (now > carEndDate) {
+        this.hostCarRepository.update({ id: car.id }, { status: false });
+      }
+    });
   }
 }
