@@ -10,6 +10,7 @@ import { v4 as uuid } from 'uuid';
 import { BookingDto } from './dto/booking.dto';
 import { BookingStatusEnum } from 'src/enums/booking.enum';
 import { HostCar } from 'src/cars/entities';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class BookingsService {
@@ -79,5 +80,21 @@ export class BookingsService {
     });
 
     return bookingList;
+  }
+
+  @Cron('0 0 * * *')
+  async updateBookingStatus(): Promise<void> {
+    const allBookings = await this.bookingRepository.find();
+    const now = new Date();
+    allBookings.forEach((booking) => {
+      const bookingEndDate = new Date(booking.endDate);
+      if (now > bookingEndDate) {
+        this.bookingRepository.update(
+          { uuid: booking.uuid },
+          { status: { id: BookingStatusEnum.RETURNTIME } },
+        );
+      }
+    });
+    return;
   }
 }

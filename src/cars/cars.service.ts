@@ -390,7 +390,7 @@ export class CarsService {
   }
 
   @Cron('0 0 * * *')
-  async updateCarStatus() {
+  async updateCarStatus(): Promise<void> {
     const allCars = await this.hostCarRepository.find();
     const now = new Date();
     allCars.forEach((car) => {
@@ -399,5 +399,6 @@ export class CarsService {
         this.hostCarRepository.update({ id: car.id }, { status: false });
       }
     });
+    return;
   }
 }
