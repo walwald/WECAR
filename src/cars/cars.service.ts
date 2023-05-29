@@ -18,7 +18,6 @@ import {
 import { File } from 'src/utils/entities/file.entity';
 import { CarFilterDto, FileDto, NewHostCarDto, NewModelDto } from './dto';
 import { ValidationInfo } from './types/validation.interface';
-import { Booking } from 'src/bookings/entities';
 
 @Injectable()
 export class CarsService {
@@ -173,7 +172,7 @@ export class CarsService {
   ): Promise<HostCar> {
     const isExisting = await this.hostCarRepository.findOne({
       where: [{ carNumber: newHostCar.carNumber }, { host: { id: hostId } }],
-      relations: ['host'],
+      relations: { host: true },
     });
 
     if (isExisting) {

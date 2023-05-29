@@ -52,4 +52,32 @@ export class BookingsService {
     await this.bookingRepository.save(bookingEntry);
     return bookingEntry;
   }
+
+  async getRecentBooking(hostCarId: number, userId: number): Promise<Booking> {
+    const bookingInfo = await this.bookingRepository.findOne({
+      where: { hostCar: { id: hostCarId }, user: { id: userId } },
+      order: { createdAt: 'DESC' },
+      relations: {
+        hostCar: {
+          carModel: { brand: true, engineSize: true, carType: true },
+          options: true,
+          fuelType: true,
+        },
+      },
+    });
+
+    if (!bookingInfo)
+      throw new NotFoundException('Invalid User or Host Car Id');
+
+    return bookingInfo;
+  }
+
+  async getBookingsByHost(hostId: number): Promise<Booking[]> {
+    const bookingList = await this.bookingRepository.find({
+      where: { hostCar: { host: { id: hostId } } },
+      order: { createdAt: 'DESC' },
+    });
+
+    return bookingList;
+  }
 }
