@@ -9,6 +9,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { HostsModule } from 'src/hosts/hosts.module';
 import { File } from 'src/utils/entities/file.entity';
 import { Booking } from 'src/bookings/entities';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { Booking } from 'src/bookings/entities';
     ]),
     AuthModule,
     HostsModule,
+    ScheduleModule.forRoot(),
   ],
   providers: [CarsService],
   controllers: [CarsController],
