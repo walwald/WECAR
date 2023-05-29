@@ -231,8 +231,7 @@ export class CarsService {
 
     if (!filter.startDate !== !filter.endDate)
       throw new BadRequestException('One of Start date or End date is Missnig');
-    //조건에 맞는 booking들만 select 되어서 조건에 맞는 하나 이상의 booking이 있는 경우 결과에 나타남
-    //문제: 하나라도 해당하는 booking이 있으면 값이 나와버림
+
     const query = this.hostCarRepository
       .createQueryBuilder('hostCar')
       .leftJoinAndSelect('hostCar.carModel', 'carModel')
@@ -263,7 +262,7 @@ export class CarsService {
         address: `%${filter.address}%`,
       });
     }
-    //bookings는 전부 꺼내서 처리하기
+
     if (filter.startDate && filter.endDate) {
       query
         .andWhere(
@@ -330,44 +329,28 @@ export class CarsService {
 
     let filteredCars = await query.getMany();
 
-    //filter ver. 로직에는 문제 없는 듯 근데 날짜가 문제?
-    // .andWhere(
-    //   '(DATE_FORMAT(booking.endDate, "%Y-%m-%d") < :startDate OR DATE_FORMAT(booking.startDate, "%Y-%m-%d") > :endDate)',
-    //   { startDate: `${filter.startDate}`, endDate: `${filter.endDate}` },
-    // )
-    // .orWhere('booking.id IS NULL');
-
-    //car.bookings에 대해 for Each 돌리기 true만 있어야...근데 length가 0이면?
     if (filter.startDate && filter.endDate) {
-      filteredCars = filteredCars.filter((car, index) => {
+      filteredCars = filteredCars.filter((car) => {
         let result = true;
-        car.bookings.forEach((booking, indexing) => {
-          console.log(result, indexing);
+        car.bookings.forEach((booking) => {
           const bookingStartDate = new Date(booking.startDate);
           const bookingEndDate = new Date(booking.endDate);
+
+          const correctedBookingStartDate = new Date(
+            bookingStartDate.getTime() + 24 * 60 * 60 * 1000,
+          );
+          const correctedBookingEndDate = new Date(
+            bookingEndDate.getTime() + 24 * 60 * 60 * 1000,
+          );
           const filterStartDate = new Date(filter.startDate);
           const filterEndDate = new Date(filter.endDate);
-          console.log(
-            '변수들: ',
-            bookingStartDate,
-            bookingEndDate,
-            filterStartDate,
-            filterEndDate,
-          );
-          console.log(
-            '원본들: ',
-            booking.startDate,
-            booking.endDate,
-            filter.startDate,
-            filter.endDate,
-          );
+
           result =
             result &&
-            (bookingEndDate < filterStartDate ||
-              bookingStartDate > filterEndDate);
+            (correctedBookingEndDate < filterStartDate ||
+              correctedBookingStartDate > filterEndDate);
           return result;
         });
-        console.log(result, index);
         return result;
       });
     }
