@@ -10,7 +10,7 @@ export class BookingStatus {
   @Column({ unique: true, nullable: false })
   name: string;
 
-  @OneToMany(() => BookingLog, (bookingLog) => bookingLog.booking)
+  @OneToMany(() => BookingLog, (bookingLog) => bookingLog.bookingStatus)
   logs: BookingLog[];
 
   @OneToMany(() => Booking, (booking) => booking.status)

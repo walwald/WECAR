@@ -12,6 +12,7 @@ import { UtilsModule } from './utils/utils.module';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { BookingSubscriber } from './bookings/booking.subscriber';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { BookingSubscriber } from './bookings/booking.subscriber';
     BookingsModule,
     AuthModule,
     UtilsModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
