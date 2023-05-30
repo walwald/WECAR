@@ -1,22 +1,17 @@
 import {
-  BadGatewayException,
   BadRequestException,
-  ConflictException,
-  HttpException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { Payment, TossCard } from './entities';
+import { Payment } from './entities';
 import { EntityManager, Repository } from 'typeorm';
 import { Booking } from 'src/bookings/entities';
 import { PaymentStatusEnum } from 'src/enums/payment.enum';
 import { TossKeyDto } from './dto/toss-key.dto';
 import { BookingStatusEnum } from 'src/enums/booking.enum';
 import { HttpService } from '@nestjs/axios';
-import { AxiosError } from 'axios';
 
 @Injectable()
 export class PaymentsService {
