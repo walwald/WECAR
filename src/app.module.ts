@@ -13,6 +13,7 @@ import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { BookingSubscriber } from './bookings/booking.subscriber';
 import { PaymentsModule } from './payments/payments.module';
+import { PaymentSubscriber } from './payments/payment.subscriber';
 
 @Module({
   imports: [
@@ -44,7 +45,7 @@ import { PaymentsModule } from './payments/payments.module';
       charset: 'utf8mb4',
       logging: true,
       keepConnectionAlive: true,
-      subscribers: [BookingSubscriber],
+      subscribers: [BookingSubscriber, PaymentSubscriber],
       timezone: 'Asia/Seoul',
     }),
     UsersModule,

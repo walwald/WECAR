@@ -4,7 +4,7 @@ import {
   NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, EntityManager, Repository } from 'typeorm';
 import {
   Brand,
@@ -39,6 +39,7 @@ export class CarsService {
     private fileRepository: Repository<File>,
     @InjectRepository(Option)
     private optionRepository: Repository<Option>,
+    @InjectEntityManager()
     private entityManager: EntityManager,
   ) {}
 

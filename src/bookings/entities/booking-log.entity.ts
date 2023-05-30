@@ -1,4 +1,10 @@
-import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Booking } from './booking.entity';
 import { BookingStatus } from './booking-status.entity';
 
@@ -14,4 +20,7 @@ export class BookingLog {
   @ManyToOne(() => BookingStatus, (booking) => booking.logs)
   @JoinColumn()
   bookingStatus: BookingStatus;
+
+  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
+  createdAt: Date;
 }

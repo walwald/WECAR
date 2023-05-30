@@ -1,4 +1,10 @@
-import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Payment } from './payment.entity';
 import { PaymentStatus } from './payment-status.entity';
 
@@ -14,4 +20,7 @@ export class PaymentLog {
   @ManyToOne(() => PaymentStatus, (payment) => payment.logs)
   @JoinColumn()
   paymentStatus: PaymentStatus;
+
+  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
+  createdAt: Date;
 }
