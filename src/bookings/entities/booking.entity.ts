@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { BookingStatus } from './booking-status.entity';
 import { BookingLog } from './booking-log.entity';
+import { Payment } from 'src/payments/entities';
 
 @Entity('bookings')
 export class Booking {
@@ -49,6 +50,9 @@ export class Booking {
 
   @OneToMany(() => BookingLog, (bookingLog) => bookingLog.booking)
   logs: BookingLog[];
+
+  @OneToMany(() => Payment, (payment) => payment.booking)
+  payments: Payment[];
 
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;

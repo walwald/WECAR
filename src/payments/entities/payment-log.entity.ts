@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Payment } from './payment.entity';
 import { PaymentStatus } from './payment-status.entity';
 
@@ -20,7 +14,4 @@ export class PaymentLog {
   @ManyToOne(() => PaymentStatus, (payment) => payment.logs)
   @JoinColumn()
   paymentStatus: PaymentStatus;
-
-  @Column({ unique: true, nullable: false })
-  name: string;
 }

@@ -1,5 +1,3 @@
-import { HostCar } from 'src/cars/entities';
-import { User } from 'src/users/entities';
 import {
   Column,
   CreateDateColumn,
@@ -12,14 +10,19 @@ import {
 } from 'typeorm';
 import { PaymentStatus } from './payment-status.entity';
 import { PaymentLog } from './payment-log.entity';
+import { Booking } from 'src/bookings/entities';
 
 @Entity('payments')
 export class Payment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'uuid', unique: true, nullable: false })
-  uuid: string;
+  //toss API에 맞게 수정
+  //uuid를 FK로 쓰는 법 찾아보기
+
+  @ManyToOne(() => Booking, (booking) => booking.payments)
+  @JoinColumn({ referencedColumnName: 'uuid' })
+  booking: Booking;
 
   //   @ManyToOne(() => HostCar, (hostCar) => hostCar.bookings, {
   //     onDelete: 'SET NULL',
@@ -27,21 +30,15 @@ export class Payment {
   //   @JoinColumn()
   //   hostCar: HostCar;
 
-  @ManyToOne(() => User, (user) => user.bookings)
-  @JoinColumn()
-  user: User;
+  //   @ManyToOne(() => User, (user) => user.bookings)
+  //   @JoinColumn()
+  //   user: User;
 
-  @Column({ name: 'start_date', nullable: false })
-  startDate: Date;
+  //   @Column({ name: 'total_price', nullable: false })
+  //   totalPrice: number;
 
-  @Column({ name: 'end_date', nullable: false })
-  endDate: Date;
-
-  @Column({ name: 'total_price', nullable: false })
-  totalPrice: number;
-
-  @Column()
-  commission: number;
+  //   @Column()
+  //   commission: number;
 
   @ManyToOne(() => PaymentStatus, (paymentStatus) => paymentStatus.payments)
   @JoinColumn()
