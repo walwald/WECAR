@@ -59,9 +59,8 @@ export class BookingsService {
       order: { createdAt: 'DESC' },
       relations: {
         hostCar: {
-          carModel: { brand: true, engineSize: true, carType: true },
-          options: true,
-          fuelType: true,
+          carModel: { brand: true },
+          files: true,
         },
       },
     });
