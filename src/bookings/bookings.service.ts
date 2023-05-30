@@ -79,4 +79,17 @@ export class BookingsService {
 
     return bookingList;
   }
+
+  async deleteRecentBooking(hostCarId: number, userId: number): Promise<any> {
+    const bookingInfo = await this.bookingRepository.delete({
+      hostCar: { id: hostCarId },
+      user: { id: userId },
+      status: { id: BookingStatusEnum.PROCESSING },
+    });
+
+    if (!bookingInfo)
+      throw new NotFoundException('Invalid User or Host Car Id');
+
+    return bookingInfo;
+  }
 }
