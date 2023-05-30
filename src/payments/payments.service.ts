@@ -1,8 +1,12 @@
 import {
+  BadGatewayException,
   BadRequestException,
   ConflictException,
+  HttpException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Payment, TossCard } from './entities';
@@ -75,7 +79,7 @@ export class PaymentsService {
         method: 'POST',
         url: 'https://api.tosspayments.com/v1/payments/confirm',
         headers: {
-          Authorization: `${encodedKey}`,
+          Authorization: encodedKey,
           'Content-Type': 'application/json',
         },
         data: {
@@ -84,17 +88,16 @@ export class PaymentsService {
           orderId: tossKey.orderId,
         },
       };
-
       try {
-        response = this.httpService.request(options);
-        console.log(response.data);
+        response = await this.httpService.request(options).toPromise();
       } catch (error) {
-        console.error(error);
-        throw new AxiosError('Toss Connection Error');
+        throw new ServiceUnavailableException('Toss Connection Error');
       }
     });
+    console.log('response.data: ', response.data);
 
-    return response.data;
     // axios의 결과값(response)를 우리 어딘가 디비에 저장(고객 결제 영수증이니까)
+
+    //return response.data;
   }
 }

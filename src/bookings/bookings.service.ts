@@ -85,7 +85,18 @@ export class BookingsService {
   async getBookingsByHost(hostId: number): Promise<Booking[]> {
     const bookingList = await this.bookingRepository.find({
       where: { hostCar: { host: { id: hostId } } },
+      relations: { user: true, status: true },
       order: { createdAt: 'DESC' },
+      select: {
+        uuid: true,
+        commission: true,
+        createdAt: true,
+        endDate: true,
+        startDate: true,
+        status: { name: true },
+        totalPrice: true,
+        user: { name: true, phoneNumber: true },
+      },
     });
 
     return bookingList;
