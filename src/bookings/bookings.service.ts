@@ -71,6 +71,7 @@ export class BookingsService {
         'user.name',
         'user.phoneNumber',
         'hostCar.pricePerDay',
+        'files.url',
       ])
       .orderBy('booking.createdAt', 'DESC')
       .getOne();
