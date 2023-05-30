@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Payment } from './entities';
 import { Repository } from 'typeorm';
@@ -15,20 +20,24 @@ export class PaymentsService {
   ) {}
 
   async createPayment(bookingUuid: string, method: string): Promise<Payment> {
-    const booking = await this.bookingRepository.findOneBy({
-      uuid: bookingUuid,
-    });
+    try {
+      const booking = await this.bookingRepository.findOneBy({
+        uuid: bookingUuid,
+      });
 
-    if (!booking) throw new NotFoundException('Invalid Booking uuid');
+      if (!booking) throw new NotFoundException('Invalid Booking uuid');
 
-    const paymentEntry = this.paymentRepository.create({
-      booking,
-      method,
-      status: { id: PaymentStatusEnum.WAITING },
-    });
+      const paymentEntry = this.paymentRepository.create({
+        booking,
+        method,
+        status: { id: PaymentStatusEnum.WAITING },
+      });
 
-    await this.paymentRepository.save(paymentEntry);
+      await this.paymentRepository.save(paymentEntry);
 
-    return paymentEntry;
+      return paymentEntry;
+    } catch (err) {
+      throw new BadRequestException('One Payment for One Booking');
+    }
   }
 }

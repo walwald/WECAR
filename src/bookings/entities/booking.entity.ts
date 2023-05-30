@@ -7,6 +7,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -51,8 +52,8 @@ export class Booking {
   @OneToMany(() => BookingLog, (bookingLog) => bookingLog.booking)
   logs: BookingLog[];
 
-  @OneToMany(() => Payment, (payment) => payment.booking)
-  payments: Payment[];
+  @OneToOne(() => Payment, (payment) => payment.booking)
+  payment: Payment;
 
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;
