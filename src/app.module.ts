@@ -12,6 +12,8 @@ import { UtilsModule } from './utils/utils.module';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { BookingSubscriber } from './bookings/booking.subscriber';
+import { PaymentsModule } from './payments/payments.module';
+import { PaymentSubscriber } from './payments/payment.subscriber';
 
 @Module({
   imports: [
@@ -43,7 +45,8 @@ import { BookingSubscriber } from './bookings/booking.subscriber';
       charset: 'utf8mb4',
       logging: true,
       keepConnectionAlive: true,
-      subscribers: [BookingSubscriber],
+      subscribers: [BookingSubscriber, PaymentSubscriber],
+      timezone: 'Asia/Seoul',
     }),
     UsersModule,
     CarsModule,
@@ -51,6 +54,7 @@ import { BookingSubscriber } from './bookings/booking.subscriber';
     BookingsModule,
     AuthModule,
     UtilsModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,5 +1,5 @@
 import {
-  Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -14,13 +14,13 @@ export class BookingLog {
   id: number;
 
   @ManyToOne(() => Booking, (booking) => booking.logs)
-  @JoinColumn()
+  @JoinColumn({ referencedColumnName: 'uuid' })
   booking: Booking;
 
   @ManyToOne(() => BookingStatus, (booking) => booking.logs)
   @JoinColumn()
   bookingStatus: BookingStatus;
 
-  @Column({ unique: true, nullable: false })
-  name: string;
+  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
+  createdAt: Date;
 }
