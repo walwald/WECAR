@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { BookingsService } from './bookings.service';
 import { BookingDto } from './dto/booking.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -33,5 +41,14 @@ export class BookingsController {
     @User() { id: userId }: ReqUser,
   ): Promise<Booking> {
     return this.bookingsService.getRecentBooking(hostCarId, userId);
+  }
+
+  @Delete(':hostCarId')
+  @UseGuards(AuthGuard('jwt-user'))
+  deleteRecentBooking(
+    @Param('hostCarId') hostCarId: number,
+    @User() { id: userId }: ReqUser,
+  ): Promise<Booking> {
+    return this.bookingsService.deleteRecentBooking(hostCarId, userId);
   }
 }
