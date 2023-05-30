@@ -11,18 +11,22 @@ import {
 import { PaymentStatus } from './payment-status.entity';
 import { PaymentLog } from './payment-log.entity';
 import { Booking } from 'src/bookings/entities';
+import { TossInfo } from './toss-payment.entity';
 
 @Entity('payments')
 export class Payment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  //toss API에 맞게 수정
-  //uuid를 FK로 쓰는 법 찾아보기
-
   @ManyToOne(() => Booking, (booking) => booking.payments)
   @JoinColumn({ referencedColumnName: 'uuid' })
   booking: Booking;
+
+  @Column()
+  method: string;
+
+  @OneToMany(() => TossInfo, (tossInfo) => tossInfo.payment)
+  tossInfo: TossInfo[];
 
   @ManyToOne(() => PaymentStatus, (paymentStatus) => paymentStatus.payments)
   @JoinColumn()
