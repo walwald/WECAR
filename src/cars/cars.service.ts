@@ -332,9 +332,10 @@ export class CarsService {
     if (filter.startDate && filter.endDate) {
       filteredCars = filteredCars.filter((car) => {
         let result = true;
-        car.bookings.forEach((booking) => {
+        car.bookings.forEach((booking, index) => {
           const bookingStartDate = new Date(booking.startDate);
           const bookingEndDate = new Date(booking.endDate);
+          console.log('원본 시간: ', index, bookingStartDate, bookingEndDate);
 
           const correctedBookingStartDate = new Date(
             bookingStartDate.getTime() + 24 * 60 * 60 * 1000,
@@ -344,7 +345,12 @@ export class CarsService {
           );
           const filterStartDate = new Date(filter.startDate);
           const filterEndDate = new Date(filter.endDate);
-
+          console.log(
+            '조정한 시간: ',
+            index,
+            correctedBookingStartDate,
+            correctedBookingEndDate,
+          );
           result =
             result &&
             (correctedBookingEndDate < filterStartDate ||

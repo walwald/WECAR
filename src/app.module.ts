@@ -45,6 +45,7 @@ import { PaymentsModule } from './payments/payments.module';
       logging: true,
       keepConnectionAlive: true,
       subscribers: [BookingSubscriber],
+      timezone: 'Asia/Seoul',
     }),
     UsersModule,
     CarsModule,

@@ -24,22 +24,6 @@ export class Payment {
   @JoinColumn({ referencedColumnName: 'uuid' })
   booking: Booking;
 
-  //   @ManyToOne(() => HostCar, (hostCar) => hostCar.bookings, {
-  //     onDelete: 'SET NULL',
-  //   })
-  //   @JoinColumn()
-  //   hostCar: HostCar;
-
-  //   @ManyToOne(() => User, (user) => user.bookings)
-  //   @JoinColumn()
-  //   user: User;
-
-  //   @Column({ name: 'total_price', nullable: false })
-  //   totalPrice: number;
-
-  //   @Column()
-  //   commission: number;
-
   @ManyToOne(() => PaymentStatus, (paymentStatus) => paymentStatus.payments)
   @JoinColumn()
   status: PaymentStatus;
