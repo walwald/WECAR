@@ -55,16 +55,25 @@ export class BookingsService {
   }
 
   async getRecentBooking(hostCarId: number, userId: number): Promise<Booking> {
-    const bookingInfo = await this.bookingRepository.findOne({
-      where: { hostCar: { id: hostCarId }, user: { id: userId } },
-      order: { createdAt: 'DESC' },
-      relations: {
-        hostCar: {
-          carModel: { brand: true },
-          files: true,
-        },
-      },
-    });
+    const bookingInfo = this.bookingRepository
+      .createQueryBuilder('booking')
+      .leftJoinAndSelect('booking.hostCar', 'hostCar')
+      .leftJoinAndSelect('hostCar.files', 'files')
+      .leftJoinAndSelect('hostCar.carModel', 'carModel')
+      .leftJoinAndSelect('carModel.brand', 'brand')
+      .leftJoinAndSelect('booking.user', 'user')
+      .where('hostCar.id = :hostCarId', { hostCarId })
+      .andWhere('user.id = :userId', { userId })
+      .select([
+        'booking',
+        'carModel.name',
+        'brand.name',
+        'user.name',
+        'user.phoneNumber',
+        'hostCar.pricePerDay',
+      ])
+      .orderBy('booking.createdAt', 'DESC')
+      .getOne();
 
     if (!bookingInfo)
       throw new NotFoundException('Invalid User or Host Car Id');
