@@ -12,7 +12,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { CarModel } from './car-model.entity';
-import { Host } from 'src/hosts/entities/host.entity';
+import { Host } from 'src/payments/hosts/entities/host.entity';
 import { FuelType } from './fuel-type.entity';
 import { File } from 'src/utils/entities/file.entity';
 import { Option } from './option.entity';

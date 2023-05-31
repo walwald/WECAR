@@ -29,25 +29,21 @@ export class PaymentsService {
   ) {}
 
   async createPayment(bookingUuid: string, method: string): Promise<Payment> {
-    try {
-      const booking = await this.bookingRepository.findOneBy({
-        uuid: bookingUuid,
-      });
+    const booking = await this.bookingRepository.findOneBy({
+      uuid: bookingUuid,
+    });
 
-      if (!booking) throw new NotFoundException('Invalid Booking uuid');
+    if (!booking) throw new NotFoundException('Invalid Booking uuid');
 
-      const paymentEntry = this.paymentRepository.create({
-        booking,
-        method,
-        status: { id: PaymentStatusEnum.WAITING },
-      });
+    const paymentEntry = this.paymentRepository.create({
+      booking,
+      method,
+      status: { id: PaymentStatusEnum.WAITING },
+    });
 
-      await this.paymentRepository.save(paymentEntry);
+    await this.paymentRepository.save(paymentEntry);
 
-      return paymentEntry;
-    } catch (err) {
-      throw new BadRequestException('One Payment for One Booking');
-    }
+    return paymentEntry;
   }
 
   async completeTossPayment(tossKey: TossKeyDto) {
@@ -72,6 +68,7 @@ export class PaymentsService {
         { uuid: tossKey.orderId, status: { id: BookingStatusEnum.BOOKED } },
       );
 
+      //환경 변수로 key, domain도 상수로 빼기
       const encodedKey = Buffer.from(
         `test_sk_O6BYq7GWPVvZLZ1W5klVNE5vbo1d:`,
       ).toString('base64');
@@ -90,16 +87,19 @@ export class PaymentsService {
         },
       };
       try {
+        //lastValueFrom을 더 많이 씀 - observable
         response = await firstValueFrom(this.httpService.request(options));
       } catch (error) {
         console.error(error);
+        //toss에 환불 요청하는 flow 만들기
         throw new ServiceUnavailableException('Toss Connection Error');
       }
     });
 
     if (!response.data)
       throw new ServiceUnavailableException('Toss Info Response Error');
-
+    //transaction에 포함
+    //에러 - 승인 취소 로직
     const tossInfoEntry = this.tossInfoRepository.create({
       status: response.data.status,
       currency: response.data.currency,

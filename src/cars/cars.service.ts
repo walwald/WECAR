@@ -18,8 +18,8 @@ import {
 import { File } from 'src/utils/entities/file.entity';
 import { CarFilterDto, FileDto, NewHostCarDto, NewModelDto } from './dto';
 import { ValidationInfo } from './types/validation.interface';
-import { Cron } from '@nestjs/schedule';
 import { UtilsService } from 'src/utils/utils.service';
+import { FilteredList } from './types/filtered-list.interface';
 
 @Injectable()
 export class CarsService {
@@ -232,10 +232,8 @@ export class CarsService {
     return hostCar;
   }
 
-  async getHostCars(filter: CarFilterDto): Promise<HostCar[]> {
-    const limitNumber = 12;
-    const skip = filter.page ? (filter.page - 1) * limitNumber : 0;
-
+  //페이지 로직 따로 있는 게 좋음 - paging service OR dto, limit도 따로 빼놓는 게 좋음
+  async getHostCars(filter: CarFilterDto): Promise<FilteredList> {
     if (!filter.startDate !== !filter.endDate)
       throw new BadRequestException('One of Start date or End date is Missnig');
 
@@ -250,8 +248,7 @@ export class CarsService {
       .leftJoinAndSelect('carModel.engineSize', 'engineSize')
       .leftJoinAndSelect('carModel.carType', 'carType')
       .where('hostCar.status = true')
-      .take(limitNumber)
-      .skip(skip)
+      .groupBy('hostCar.id')
       .select([
         'hostCar.id',
         'hostCar.pricePerDay',
@@ -279,7 +276,20 @@ export class CarsService {
         .andWhere(
           'DATE_FORMAT(hostCar.endDate, "%Y-%m-%d") >= :endDate AND DATE_FORMAT(hostCar.startDate, "%Y-%m-%d") <= :endDate',
           { endDate: `${filter.endDate}` },
-        );
+        )
+        .leftJoin(
+          (subQuery) =>
+            subQuery
+              .select('*')
+              .from('bookings', 'booking')
+              .where('!(start_date > :endDate or end_date < :startDate)', {
+                startDate: filter.startDate,
+                endDate: filter.endDate,
+              }),
+          'booking_query',
+          'hostCar.id = booking_query.hostCarId',
+        )
+        .having('count(booking_query.id) < 1');
     }
 
     if (filter.minCapacity) {
@@ -288,6 +298,7 @@ export class CarsService {
       });
     }
 
+    //일치하는 경우 함수로 만들 수 있음
     if (filter.brand) {
       query.andWhere('brand.name = :brand', {
         brand: `${filter.brand}`,
@@ -334,39 +345,18 @@ export class CarsService {
       query.andWhere('option.name IN (:options)', { options: filter.options });
     }
 
-    let filteredCars = await query.getMany();
-
-    if (filter.startDate && filter.endDate) {
-      filteredCars = filteredCars.filter((car) => {
-        let result = true;
-        car.bookings.forEach((booking) => {
-          const correctedBookingStartDate = this.utilsService.makeKrDate(
-            booking.startDate,
-          );
-          const correctedBookingEndDate = this.utilsService.makeKrDate(
-            booking.endDate,
-          );
-          const filterStartDate = new Date(filter.startDate);
-          const filterEndDate = new Date(filter.endDate);
-
-          result =
-            result &&
-            (correctedBookingEndDate < filterStartDate ||
-              correctedBookingStartDate > filterEndDate);
-          return result;
-        });
-        return result;
-      });
-    }
+    this.utilsService.pagenation(query, filter.page);
+    const filteredCars = await query.getMany();
 
     filteredCars.forEach((car) => {
       car.startDate = this.utilsService.makeKrDate(car.startDate);
       car.endDate = this.utilsService.makeKrDate(car.endDate);
     });
 
-    return Promise.all(filteredCars);
+    return { totalCount: filteredCars.length, hostCars: filteredCars };
   }
 
+  //querybuilder 구성 - 완전히 같으면 함수로 변경
   async getHostCarDetail(id: number): Promise<HostCar> {
     const hostCar = await this.hostCarRepository
       .createQueryBuilder('hostCar')
@@ -404,18 +394,5 @@ export class CarsService {
     });
 
     return hostCar;
-  }
-
-  @Cron('0 0 * * *')
-  async updateCarStatus(): Promise<void> {
-    const allCars = await this.hostCarRepository.find();
-    const now = new Date();
-    allCars.forEach((car) => {
-      const carEndDate = this.utilsService.makeKrDate(car.endDate);
-      if (now > carEndDate) {
-        this.hostCarRepository.update({ id: car.id }, { status: false });
-      }
-    });
-    return;
   }
 }

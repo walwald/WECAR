@@ -15,6 +15,7 @@ import { ReqUser } from 'src/auth/types';
 import { AuthGuard } from '@nestjs/passport';
 import { DeleteResult } from 'typeorm';
 import { CarFilterDto, CarRegisterDto, NewModelDto } from './dto';
+import { FilteredList } from './types/filtered-list.interface';
 
 @Controller('cars')
 export class CarsController {
@@ -73,7 +74,7 @@ export class CarsController {
   }
 
   @Get()
-  getHostCars(@Query() filter: CarFilterDto): Promise<HostCar[]> {
+  getHostCars(@Query() filter: CarFilterDto): Promise<FilteredList> {
     return this.carsService.getHostCars(filter);
   }
 
