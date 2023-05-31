@@ -19,6 +19,7 @@ export class HostAtStrategy extends PassportStrategy(Strategy, 'jwt-host') {
     });
   }
   async validate(payload: Payload): Promise<Host> {
+    console.log('passport 안!!!!!');
     const host = await this.authService.tokenValidateHost(payload);
     if (!host) throw new UnauthorizedException('Host Not Found');
 

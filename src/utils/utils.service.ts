@@ -27,4 +27,9 @@ export class UtilsService {
     const accessToken = this.jwtService.sign(payload);
     return { refreshToken, accessToken };
   }
+
+  makeKrDate(date: Date): Date {
+    const correctedDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+    return correctedDate;
+  }
 }

@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -12,7 +13,8 @@ export class UserSigninLog {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.signinLogs)
+  @ManyToOne(() => User, (user) => user.signinLogs, { onDelete: 'SET NULL' })
+  @JoinColumn()
   user: User;
 
   @Column()

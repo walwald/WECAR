@@ -30,6 +30,7 @@ import { PaymentSubscriber } from './payments/payment.subscriber';
         DB_DATABASE: Joi.string().required(),
         SECRET_KEY: Joi.string().required(),
         DB_DATESTRINGS: Joi.string().required(),
+        TZ: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -40,7 +41,7 @@ import { PaymentSubscriber } from './payments/payment.subscriber';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       entities: [__dirname + '/**/entities/*.entity.ts'],
-      synchronize: true,
+      synchronize: false,
       autoLoadEntities: true,
       charset: 'utf8mb4',
       logging: true,

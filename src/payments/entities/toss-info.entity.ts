@@ -4,13 +4,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Payment } from 'src/payments/entities';
-import { TossCard } from './toss-card.entity';
 
-@Entity('Toss_Info')
+@Entity('toss_info')
 export class TossInfo {
   @PrimaryGeneratedColumn()
   id: number;
@@ -21,15 +19,20 @@ export class TossInfo {
   @Column()
   currency: string;
 
+  @Column()
+  requestedAt: Date;
+
+  @Column()
+  approvedAt: Date;
+
   @Column({ name: 'total_amount' })
   totalAmount: number;
 
   @Column()
   vat: number;
 
-  @OneToOne(() => TossCard, (tossCard) => tossCard.tossInfo)
-  @JoinColumn()
-  card: TossCard;
+  @Column()
+  method: string;
 
   @ManyToOne(() => Payment, (payment) => payment.tossInfo, {
     onDelete: 'SET NULL',

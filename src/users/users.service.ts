@@ -55,7 +55,6 @@ export class UsersService {
     return { ...tokens };
   }
 
-  //subscriber - user가 insert되면 다음 절차가 next 로그 저장 바로, afterupdate 같은 거 쓸 수 있음 afterinsert
   async signin(
     signinData: SigninAuthDto,
     ip: string,

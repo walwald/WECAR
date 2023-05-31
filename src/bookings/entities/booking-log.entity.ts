@@ -13,11 +13,13 @@ export class BookingLog {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Booking, (booking) => booking.logs)
+  @ManyToOne(() => Booking, (booking) => booking.logs, { onDelete: 'SET NULL' })
   @JoinColumn({ referencedColumnName: 'uuid' })
   booking: Booking;
 
-  @ManyToOne(() => BookingStatus, (booking) => booking.logs)
+  @ManyToOne(() => BookingStatus, (booking) => booking.logs, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn()
   bookingStatus: BookingStatus;
 

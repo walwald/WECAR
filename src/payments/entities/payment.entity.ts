@@ -5,21 +5,22 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { PaymentStatus } from './payment-status.entity';
 import { PaymentLog } from './payment-log.entity';
 import { Booking } from 'src/bookings/entities';
-import { TossInfo } from './toss-payment.entity';
+import { TossInfo } from './toss-info.entity';
 
 @Entity('payments')
 export class Payment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => Booking, (booking) => booking.payment)
+  @ManyToOne(() => Booking, (booking) => booking.payment, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ referencedColumnName: 'uuid' })
   booking: Booking;
 
@@ -29,7 +30,9 @@ export class Payment {
   @OneToMany(() => TossInfo, (tossInfo) => tossInfo.payment)
   tossInfo: TossInfo[];
 
-  @ManyToOne(() => PaymentStatus, (paymentStatus) => paymentStatus.payments)
+  @ManyToOne(() => PaymentStatus, (paymentStatus) => paymentStatus.payments, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn()
   status: PaymentStatus;
 
