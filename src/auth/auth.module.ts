@@ -20,7 +20,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
         secret: config.get('SECRET_KEY'),
-        signOptions: { expiresIn: '2h' },
+        signOptions: { expiresIn: '3m' },
       }),
     }),
     TypeOrmModule.forFeature([User, Host, UserSigninLog, HostSigninLog]),
