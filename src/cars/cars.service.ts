@@ -217,7 +217,7 @@ export class CarsService {
   }
 
   async getCarByHost(hostId: number): Promise<HostCar> {
-    return this.hostCarRepository.findOne({
+    const hostCar = await this.hostCarRepository.findOne({
       relations: {
         carModel: { brand: true, carType: true, engineSize: true },
         fuelType: true,
@@ -226,6 +226,10 @@ export class CarsService {
       },
       where: { host: { id: hostId } },
     });
+
+    hostCar.startDate = this.utilsService.makeKrDate(hostCar.startDate);
+    hostCar.endDate = this.utilsService.makeKrDate(hostCar.endDate);
+    return hostCar;
   }
 
   async getHostCars(filter: CarFilterDto): Promise<HostCar[]> {
