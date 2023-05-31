@@ -82,7 +82,6 @@ export class UsersService {
     if (user.refreshToken !== reqUser.refreshToken) {
       throw new BadRequestException('Invalid Refresh Token');
     }
-    console.log('utilsService: ', this.utilsService);
     const tokens = this.utilsService.createTokens(user.id, user.name);
     await this.userRepository.update(
       { id: user.id },
