@@ -54,7 +54,6 @@ export class PaymentsService {
     let response;
     let payment;
     await this.entityManager.transaction(async (entityManager) => {
-      console.log('tossKey: ', tossKey);
       payment = await this.paymentRepository.findOneBy({
         booking: { uuid: tossKey.orderId },
       });
@@ -97,7 +96,6 @@ export class PaymentsService {
         throw new ServiceUnavailableException('Toss Connection Error');
       }
     });
-    console.log('response.data: ', response.data);
 
     if (!response.data)
       throw new ServiceUnavailableException('Toss Info Response Error');
@@ -114,33 +112,5 @@ export class PaymentsService {
     });
 
     return this.tossInfoRepository.save(tossInfoEntry);
-    // axios의 결과값(response)를 우리 어딘가 디비에 저장(고객 결제 영수증이니까)
-    //return response.data;
-  }
-
-  async tossTest(tossKey: TossKeyDto) {
-    let response;
-    const encodedKey = Buffer.from(`${tossKey.paymentKey}:`).toString('base64');
-
-    const options = {
-      method: 'POST',
-      url: 'https://api.tosspayments.com/v1/payments/confirm',
-      headers: {
-        Authorization: encodedKey,
-        'Content-Type': 'application/json',
-      },
-      data: {
-        paymentKey: tossKey.paymentKey,
-        amount: tossKey.amount,
-        orderId: tossKey.orderId,
-      },
-    };
-    try {
-      response = await this.httpService.request(options).toPromise();
-    } catch (error) {
-      throw new ServiceUnavailableException('Toss Connection Error');
-    }
-
-    console.log('response.data: ', response.data);
   }
 }
