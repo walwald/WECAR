@@ -19,11 +19,20 @@ export class TossInfo {
   @Column()
   currency: string;
 
+  @Column()
+  requestedAt: Date;
+
+  @Column()
+  approvedAt: Date;
+
   @Column({ name: 'total_amount' })
   totalAmount: number;
 
   @Column()
   vat: number;
+
+  @Column()
+  method: string;
 
   @ManyToOne(() => Payment, (payment) => payment.tossInfo, {
     onDelete: 'SET NULL',

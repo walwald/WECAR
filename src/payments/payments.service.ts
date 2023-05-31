@@ -71,15 +71,15 @@ export class PaymentsService {
       );
 
       const encodedKey = Buffer.from(
-        `test_ck_dP9BRQmyarYqlJb9Xk9rJ07KzLNk:`,
+        `test_sk_O6BYq7GWPVvZLZ1W5klVNE5vbo1d:`,
       ).toString('base64');
 
       const options = {
         method: 'POST',
         url: 'https://api.tosspayments.com/v1/payments/confirm',
         headers: {
-          Authorization: `Basic ${encodedKey}`,
           'Content-Type': 'application/json',
+          Authorization: `Basic ${encodedKey}`,
         },
         data: {
           paymentKey: tossKey.paymentKey,
