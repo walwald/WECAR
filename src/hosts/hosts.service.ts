@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -81,10 +82,10 @@ export class HostsService {
 
   async refreshAccessToken(reqUser: ReqUser): Promise<Tokens> {
     const host = await this.hostRepository.findOneBy({ id: reqUser.id });
-    if (!host) throw new UnauthorizedException('Host Not Found');
+    if (!host) throw new BadRequestException('Host Not Found');
 
     if (host.refreshToken !== reqUser.refreshToken) {
-      throw new UnauthorizedException('Invalid Refresh Token');
+      throw new BadRequestException('Invalid Refresh Token');
     }
     const tokens = this.utilsService.createTokens(host.id, host.name);
     await this.hostRepository.update(

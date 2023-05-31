@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -77,10 +78,10 @@ export class UsersService {
 
   async refreshAccessToken(reqUser: ReqUser): Promise<Tokens> {
     const user = await this.userRepository.findOneBy({ id: reqUser.id });
-    if (!user) throw new UnauthorizedException('User Not Found');
+    if (!user) throw new BadRequestException('User Not Found');
 
     if (user.refreshToken !== reqUser.refreshToken) {
-      throw new UnauthorizedException('Invalid Refresh Token');
+      throw new BadRequestException('Invalid Refresh Token');
     }
     console.log('utilsService: ', this.utilsService);
     const tokens = this.utilsService.createTokens(user.id, user.name);
