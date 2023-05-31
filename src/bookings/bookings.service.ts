@@ -11,6 +11,7 @@ import { BookingDto } from './dto/booking.dto';
 import { BookingStatusEnum } from 'src/enums/booking.enum';
 import { HostCar } from 'src/cars/entities';
 import { Cron } from '@nestjs/schedule';
+import { UtilsService } from 'src/utils/utils.service';
 
 @Injectable()
 export class BookingsService {
@@ -19,6 +20,7 @@ export class BookingsService {
     private bookingRepository: Repository<Booking>,
     @InjectRepository(HostCar)
     private hostCarRepository: Repository<HostCar>,
+    private utilsService: UtilsService,
   ) {}
 
   async createBooking(
@@ -35,9 +37,7 @@ export class BookingsService {
 
     const newStartDate = new Date(bookingInfo.startDate);
     const newEndDate = new Date(bookingInfo.endDate);
-    console.log(bookingInfo.startDate);
-    console.log(newStartDate);
-    console.log(newEndDate);
+
     hostCar.bookings?.forEach((booking) => {
       if (!(newStartDate > booking.endDate || newEndDate < booking.startDate)) {
         throw new ConflictException('Booking Date Conflicted');
@@ -59,7 +59,7 @@ export class BookingsService {
   }
 
   async getRecentBooking(hostCarId: number, userId: number): Promise<Booking> {
-    const bookingInfo = this.bookingRepository
+    const bookingInfo = await this.bookingRepository
       .createQueryBuilder('booking')
       .leftJoinAndSelect('booking.hostCar', 'hostCar')
       .leftJoinAndSelect('hostCar.files', 'files')
@@ -83,6 +83,9 @@ export class BookingsService {
     if (!bookingInfo)
       throw new NotFoundException('Invalid User or Host Car Id');
 
+    bookingInfo.startDate = this.utilsService.makeKrDate(bookingInfo.startDate);
+    bookingInfo.endDate = this.utilsService.makeKrDate(bookingInfo.endDate);
+
     return bookingInfo;
   }
 
@@ -103,6 +106,11 @@ export class BookingsService {
       },
     });
 
+    bookingList.forEach((booking) => {
+      booking.startDate = this.utilsService.makeKrDate(booking.startDate);
+      booking.endDate = this.utilsService.makeKrDate(booking.endDate);
+    });
+
     return bookingList;
   }
 
@@ -111,7 +119,7 @@ export class BookingsService {
     const allBookings = await this.bookingRepository.find();
     const now = new Date();
     allBookings.forEach((booking) => {
-      const bookingEndDate = new Date(booking.endDate);
+      const bookingEndDate = this.utilsService.makeKrDate(booking.endDate);
       if (now > bookingEndDate) {
         this.bookingRepository.update(
           { uuid: booking.uuid },

@@ -19,6 +19,7 @@ import { File } from 'src/utils/entities/file.entity';
 import { CarFilterDto, FileDto, NewHostCarDto, NewModelDto } from './dto';
 import { ValidationInfo } from './types/validation.interface';
 import { Cron } from '@nestjs/schedule';
+import { UtilsService } from 'src/utils/utils.service';
 
 @Injectable()
 export class CarsService {
@@ -41,6 +42,7 @@ export class CarsService {
     private optionRepository: Repository<Option>,
     @InjectEntityManager()
     private entityManager: EntityManager,
+    private utilsService: UtilsService,
   ) {}
 
   registerNewModel(newModels: NewModelDto[]): Promise<CarModel[]> {
@@ -333,27 +335,16 @@ export class CarsService {
     if (filter.startDate && filter.endDate) {
       filteredCars = filteredCars.filter((car) => {
         let result = true;
-        car.bookings.forEach((booking, index) => {
-          const bookingStartDate = new Date(booking.startDate);
-          const bookingEndDate = new Date(booking.endDate);
-          console.log('그냥222: ', index, new Date());
-          console.log('그냥: ', index, booking.startDate, booking.endDate);
-          console.log('원본 시간: ', index, bookingStartDate, bookingEndDate);
-
-          const correctedBookingStartDate = new Date(
-            bookingStartDate.getTime() + 9 * 60 * 60 * 1000,
+        car.bookings.forEach((booking) => {
+          const correctedBookingStartDate = this.utilsService.makeKrDate(
+            booking.startDate,
           );
-          const correctedBookingEndDate = new Date(
-            bookingEndDate.getTime() + 9 * 60 * 60 * 1000,
+          const correctedBookingEndDate = this.utilsService.makeKrDate(
+            booking.endDate,
           );
           const filterStartDate = new Date(filter.startDate);
           const filterEndDate = new Date(filter.endDate);
-          console.log(
-            '조정한 시간: ',
-            index,
-            correctedBookingStartDate,
-            correctedBookingEndDate,
-          );
+
           result =
             result &&
             (correctedBookingEndDate < filterStartDate ||
@@ -363,6 +354,12 @@ export class CarsService {
         return result;
       });
     }
+
+    filteredCars.forEach((car) => {
+      car.startDate = this.utilsService.makeKrDate(car.startDate);
+      car.endDate = this.utilsService.makeKrDate(car.endDate);
+    });
+
     return Promise.all(filteredCars);
   }
 
@@ -395,6 +392,13 @@ export class CarsService {
 
     if (!hostCar) throw new NotFoundException('Invalid hostCar Id');
 
+    hostCar.startDate = this.utilsService.makeKrDate(hostCar.startDate);
+    hostCar.endDate = this.utilsService.makeKrDate(hostCar.endDate);
+    hostCar.bookings.forEach((booking) => {
+      booking.startDate = this.utilsService.makeKrDate(booking.startDate);
+      booking.endDate = this.utilsService.makeKrDate(booking.endDate);
+    });
+
     return hostCar;
   }
 
@@ -403,7 +407,7 @@ export class CarsService {
     const allCars = await this.hostCarRepository.find();
     const now = new Date();
     allCars.forEach((car) => {
-      const carEndDate = new Date(car.endDate);
+      const carEndDate = this.utilsService.makeKrDate(car.endDate);
       if (now > carEndDate) {
         this.hostCarRepository.update({ id: car.id }, { status: false });
       }

@@ -5,7 +5,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { Payment } from './entities';
+import { Payment, TossInfo } from './entities';
 import { EntityManager, Repository } from 'typeorm';
 import { Booking } from 'src/bookings/entities';
 import { PaymentStatusEnum } from 'src/enums/payment.enum';
@@ -21,6 +21,8 @@ export class PaymentsService {
     private paymentRepository: Repository<Payment>,
     @InjectRepository(Booking)
     private bookingRepository: Repository<Booking>,
+    @InjectRepository(TossInfo)
+    private tossInfoRepository: Repository<TossInfo>,
     @InjectEntityManager()
     private entityManager: EntityManager,
     private httpService: HttpService,
@@ -50,9 +52,10 @@ export class PaymentsService {
 
   async completeTossPayment(tossKey: TossKeyDto) {
     let response;
+    let payment;
     await this.entityManager.transaction(async (entityManager) => {
       console.log('tossKey: ', tossKey);
-      const payment = await this.paymentRepository.findOneBy({
+      payment = await this.paymentRepository.findOneBy({
         booking: { uuid: tossKey.orderId },
       });
 
@@ -96,8 +99,22 @@ export class PaymentsService {
     });
     console.log('response.data: ', response.data);
 
-    // axios의 결과값(response)를 우리 어딘가 디비에 저장(고객 결제 영수증이니까)
+    if (!response.data)
+      throw new ServiceUnavailableException('Toss Info Response Error');
 
+    const tossInfoEntry = this.tossInfoRepository.create({
+      status: response.data.status,
+      currency: response.data.currency,
+      requestedAt: response.data.requestedAt,
+      approvedAt: response.data.approvedAt,
+      totalAmount: response.data.totalAmount,
+      vat: response.data.vat,
+      method: response.data.method,
+      payment: payment,
+    });
+
+    return this.tossInfoRepository.save(tossInfoEntry);
+    // axios의 결과값(response)를 우리 어딘가 디비에 저장(고객 결제 영수증이니까)
     //return response.data;
   }
 

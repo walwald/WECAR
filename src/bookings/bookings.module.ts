@@ -6,11 +6,13 @@ import { BookingStatus } from './entities/booking-status.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HostCar } from 'src/cars/entities';
 import { ScheduleModule } from '@nestjs/schedule';
+import { UtilsModule } from 'src/utils/utils.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Booking, BookingStatus, BookingLog, HostCar]),
     ScheduleModule.forRoot(),
+    UtilsModule,
   ],
   controllers: [BookingsController],
   providers: [BookingsService],

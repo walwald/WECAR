@@ -5,14 +5,13 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { PaymentStatus } from './payment-status.entity';
 import { PaymentLog } from './payment-log.entity';
 import { Booking } from 'src/bookings/entities';
-import { TossInfo } from './toss-payment.entity';
+import { TossInfo } from './toss-info.entity';
 
 @Entity('payments')
 export class Payment {
