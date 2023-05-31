@@ -13,7 +13,7 @@ import { UtilsController } from './utils.controller';
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
         secret: config.get('SECRET_KEY'),
-        signOptions: { expiresIn: '2h' },
+        signOptions: { expiresIn: '3m' },
       }),
     }),
   ],
