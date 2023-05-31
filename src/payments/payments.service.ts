@@ -12,6 +12,7 @@ import { PaymentStatusEnum } from 'src/enums/payment.enum';
 import { TossKeyDto } from './dto/toss-key.dto';
 import { BookingStatusEnum } from 'src/enums/booking.enum';
 import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class PaymentsService {
@@ -50,9 +51,12 @@ export class PaymentsService {
   async completeTossPayment(tossKey: TossKeyDto) {
     let response;
     await this.entityManager.transaction(async (entityManager) => {
+      console.log('tossKey: ', tossKey);
       const payment = await this.paymentRepository.findOneBy({
         booking: { uuid: tossKey.orderId },
       });
+
+      if (!payment) throw new NotFoundException('Create Payment First');
 
       await entityManager.update(
         Payment,
@@ -66,9 +70,9 @@ export class PaymentsService {
         { uuid: tossKey.orderId, status: { id: BookingStatusEnum.BOOKED } },
       );
 
-      const encodedKey = Buffer.from(`${tossKey.paymentKey}:`).toString(
-        'base64',
-      );
+      const encodedKey = Buffer.from(
+        `test_sk_dP9BRQmyarYqlJqlpDNrJ07KzLNk:`,
+      ).toString('base64');
 
       const options = {
         method: 'POST',
@@ -84,8 +88,9 @@ export class PaymentsService {
         },
       };
       try {
-        response = await this.httpService.request(options).toPromise();
+        response = await firstValueFrom(this.httpService.request(options));
       } catch (error) {
+        console.error(error);
         throw new ServiceUnavailableException('Toss Connection Error');
       }
     });
@@ -94,5 +99,31 @@ export class PaymentsService {
     // axios의 결과값(response)를 우리 어딘가 디비에 저장(고객 결제 영수증이니까)
 
     //return response.data;
+  }
+
+  async tossTest(tossKey: TossKeyDto) {
+    let response;
+    const encodedKey = Buffer.from(`${tossKey.paymentKey}:`).toString('base64');
+
+    const options = {
+      method: 'POST',
+      url: 'https://api.tosspayments.com/v1/payments/confirm',
+      headers: {
+        Authorization: encodedKey,
+        'Content-Type': 'application/json',
+      },
+      data: {
+        paymentKey: tossKey.paymentKey,
+        amount: tossKey.amount,
+        orderId: tossKey.orderId,
+      },
+    };
+    try {
+      response = await this.httpService.request(options).toPromise();
+    } catch (error) {
+      throw new ServiceUnavailableException('Toss Connection Error');
+    }
+
+    console.log('response.data: ', response.data);
   }
 }

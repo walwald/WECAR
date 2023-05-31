@@ -19,7 +19,9 @@ export class Payment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => Booking, (booking) => booking.payment)
+  @ManyToOne(() => Booking, (booking) => booking.payment, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ referencedColumnName: 'uuid' })
   booking: Booking;
 
@@ -29,7 +31,9 @@ export class Payment {
   @OneToMany(() => TossInfo, (tossInfo) => tossInfo.payment)
   tossInfo: TossInfo[];
 
-  @ManyToOne(() => PaymentStatus, (paymentStatus) => paymentStatus.payments)
+  @ManyToOne(() => PaymentStatus, (paymentStatus) => paymentStatus.payments, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn()
   status: PaymentStatus;
 

@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -12,7 +13,8 @@ export class HostSigninLog {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Host, (host) => host.signinLogs)
+  @ManyToOne(() => Host, (host) => host.signinLogs, { onDelete: 'SET NULL' })
+  @JoinColumn()
   host: Host;
 
   @Column()

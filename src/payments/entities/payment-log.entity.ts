@@ -13,11 +13,13 @@ export class PaymentLog {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Payment, (payment) => payment.logs)
+  @ManyToOne(() => Payment, (payment) => payment.logs, { onDelete: 'SET NULL' })
   @JoinColumn()
   payment: Payment;
 
-  @ManyToOne(() => PaymentStatus, (payment) => payment.logs)
+  @ManyToOne(() => PaymentStatus, (payment) => payment.logs, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn()
   paymentStatus: PaymentStatus;
 

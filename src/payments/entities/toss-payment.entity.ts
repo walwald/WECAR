@@ -4,11 +4,9 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Payment } from 'src/payments/entities';
-import { TossCard } from './toss-card.entity';
 
 @Entity('Toss_Info')
 export class TossInfo {
@@ -26,10 +24,6 @@ export class TossInfo {
 
   @Column()
   vat: number;
-
-  @OneToOne(() => TossCard, (tossCard) => tossCard.tossInfo)
-  @JoinColumn()
-  card: TossCard;
 
   @ManyToOne(() => Payment, (payment) => payment.tossInfo, {
     onDelete: 'SET NULL',

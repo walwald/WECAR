@@ -336,13 +336,15 @@ export class CarsService {
         car.bookings.forEach((booking, index) => {
           const bookingStartDate = new Date(booking.startDate);
           const bookingEndDate = new Date(booking.endDate);
+          console.log('그냥222: ', index, new Date());
+          console.log('그냥: ', index, booking.startDate, booking.endDate);
           console.log('원본 시간: ', index, bookingStartDate, bookingEndDate);
 
           const correctedBookingStartDate = new Date(
-            bookingStartDate.getTime() + 24 * 60 * 60 * 1000,
+            bookingStartDate.getTime() + 9 * 60 * 60 * 1000,
           );
           const correctedBookingEndDate = new Date(
-            bookingEndDate.getTime() + 24 * 60 * 60 * 1000,
+            bookingEndDate.getTime() + 9 * 60 * 60 * 1000,
           );
           const filterStartDate = new Date(filter.startDate);
           const filterEndDate = new Date(filter.endDate);

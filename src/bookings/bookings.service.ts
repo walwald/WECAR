@@ -35,7 +35,9 @@ export class BookingsService {
 
     const newStartDate = new Date(bookingInfo.startDate);
     const newEndDate = new Date(bookingInfo.endDate);
-
+    console.log(bookingInfo.startDate);
+    console.log(newStartDate);
+    console.log(newEndDate);
     hostCar.bookings?.forEach((booking) => {
       if (!(newStartDate > booking.endDate || newEndDate < booking.startDate)) {
         throw new ConflictException('Booking Date Conflicted');
@@ -44,6 +46,8 @@ export class BookingsService {
 
     const bookingEntry = this.bookingRepository.create({
       ...bookingInfo,
+      startDate: newStartDate,
+      endDate: newEndDate,
       uuid: uuid(),
       hostCar: { id: hostCarId },
       user: { id: userId },

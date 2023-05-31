@@ -30,6 +30,7 @@ import { PaymentSubscriber } from './payments/payment.subscriber';
         DB_DATABASE: Joi.string().required(),
         SECRET_KEY: Joi.string().required(),
         DB_DATESTRINGS: Joi.string().required(),
+        TZ: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({

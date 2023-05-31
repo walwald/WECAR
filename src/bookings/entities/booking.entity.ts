@@ -29,7 +29,7 @@ export class Booking {
   @JoinColumn()
   hostCar: HostCar;
 
-  @ManyToOne(() => User, (user) => user.bookings)
+  @ManyToOne(() => User, (user) => user.bookings, { onDelete: 'SET NULL' })
   @JoinColumn()
   user: User;
 
@@ -45,15 +45,17 @@ export class Booking {
   @Column()
   commission: number;
 
-  @ManyToOne(() => BookingStatus, (bookingStatus) => bookingStatus.bookings)
+  @ManyToOne(() => BookingStatus, (bookingStatus) => bookingStatus.bookings, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn()
   status: BookingStatus;
 
   @OneToMany(() => BookingLog, (bookingLog) => bookingLog.booking)
   logs: BookingLog[];
 
-  @OneToOne(() => Payment, (payment) => payment.booking)
-  payment: Payment;
+  @OneToMany(() => Payment, (payment) => payment.booking)
+  payment: Payment[];
 
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;
