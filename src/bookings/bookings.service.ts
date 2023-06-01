@@ -60,9 +60,12 @@ export class BookingsService {
     });
 
     if (
-      bookingInfo.totalPrice * CommissionEnum.RATE !==
+      (bookingInfo.totalPrice - bookingInfo.commission) *
+        CommissionEnum.RATE !==
       bookingInfo.commission
     ) {
+      console.log('계산: ', bookingInfo.totalPrice * CommissionEnum.RATE);
+      console.log('들어온 수수료: ', bookingInfo.commission);
       throw new BadRequestException('Wrong Commission Amount');
     }
 

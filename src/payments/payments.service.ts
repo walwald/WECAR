@@ -1,5 +1,6 @@
 import {
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
@@ -9,7 +10,7 @@ import { EntityManager, Repository } from 'typeorm';
 import { Booking } from 'src/bookings/entities';
 import { TossKeyDto } from './dto/toss-key.dto';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { PaymentStatusEnum } from './payment.enum';
 import { BookingsService } from 'src/bookings/bookings.service';
 
@@ -58,10 +59,8 @@ export class PaymentsService {
   }
 
   async completeTossPayment(tossKey: TossKeyDto) {
-    let response;
-    let payment;
     await this.entityManager.transaction(async (entityManager) => {
-      payment = await this.paymentRepository.findOneBy({
+      const payment = await this.paymentRepository.findOneBy({
         booking: { uuid: tossKey.orderId },
       });
 
@@ -77,6 +76,7 @@ export class PaymentsService {
       const bookingStatus = await this.bookingsService.getBookingStatus(
         'BOOKED',
       );
+
       await entityManager.update(
         Booking,
         { uuid: tossKey.orderId },
@@ -87,45 +87,55 @@ export class PaymentsService {
       const encodedKey = Buffer.from(
         `test_sk_O6BYq7GWPVvZLZ1W5klVNE5vbo1d:`,
       ).toString('base64');
-
-      const options = {
-        method: 'POST',
-        url: 'https://api.tosspayments.com/v1/payments/confirm',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Basic ${encodedKey}`,
-        },
-        data: {
-          paymentKey: tossKey.paymentKey,
-          amount: tossKey.amount,
-          orderId: tossKey.orderId,
-        },
-      };
       try {
+        const options = {
+          method: 'POST',
+          url: 'https://api.tosspayments.com/v1/payments/confirm',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${encodedKey}`,
+          },
+          data: {
+            paymentKey: tossKey.paymentKey,
+            amount: tossKey.amount,
+            orderId: tossKey.orderId,
+          },
+        };
+
         //lastValueFrom을 더 많이 씀 - observable
-        response = await firstValueFrom(this.httpService.request(options));
-      } catch (error) {
-        console.error(error);
-        //toss에 환불 요청하는 flow 만들기
-        throw new ServiceUnavailableException('Toss Connection Error');
+        const response = await lastValueFrom(this.httpService.request(options));
+
+        if (!response.data) {
+          throw new ServiceUnavailableException('Toss Info Connection Error');
+        }
+        const tossInfoEntry = entityManager.create(TossInfo, {
+          status: response.data.status,
+          currency: response.data.currency,
+          requestedAt: response.data.requestedAt,
+          approvedAt: response.data.approvedAt,
+          totalAmount: response.data.totalAmount,
+          vat: response.data.vat,
+          method: response.data.method,
+          payment: payment,
+        });
+
+        return entityManager.save(TossInfo, tossInfoEntry);
+      } catch (err) {
+        const options = {
+          method: 'POST',
+          url: 'https://api.tosspayments.com/v1/payments/5zJ4xY7m0kODnyRpQWGrN2xqGlNvLrKwv1M9ENjbeoPaZdL6/cancel',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${encodedKey}`,
+          },
+          data: {
+            cancelReason: '서버 에러',
+          },
+        };
+
+        await lastValueFrom(this.httpService.request(options));
+        throw new InternalServerErrorException('DataBase Error');
       }
     });
-
-    if (!response.data)
-      throw new ServiceUnavailableException('Toss Info Response Error');
-    //transaction에 포함
-    //에러 - 승인 취소 로직
-    const tossInfoEntry = this.tossInfoRepository.create({
-      status: response.data.status,
-      currency: response.data.currency,
-      requestedAt: response.data.requestedAt,
-      approvedAt: response.data.approvedAt,
-      totalAmount: response.data.totalAmount,
-      vat: response.data.vat,
-      method: response.data.method,
-      payment: payment,
-    });
-
-    return this.tossInfoRepository.save(tossInfoEntry);
   }
 }
