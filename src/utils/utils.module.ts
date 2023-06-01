@@ -18,7 +18,6 @@ import { BookingsModule } from 'src/bookings/bookings.module';
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
         secret: config.get('SECRET_KEY'),
-        signOptions: { expiresIn: '3m' },
       }),
     }),
     TypeOrmModule.forFeature([HostCar, Booking]),
