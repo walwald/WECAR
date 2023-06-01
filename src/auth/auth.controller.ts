@@ -3,14 +3,14 @@ import AuthService from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/utils/decorators/user.decorator';
 import { Payload, ReqUser } from './types';
-import { NestAuthGuard } from './security';
+import { UserAuthGuard } from './security';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get('check/user')
-  @UseGuards(NestAuthGuard)
+  @UseGuards(UserAuthGuard)
   isAuthenticatedUser(@User() user: ReqUser): Payload {
     return { id: user.id, name: user.name };
   }

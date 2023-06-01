@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import { Payload, Tokens } from 'src/auth/types';
+import { PageEnum } from './common.enum';
 
 @Injectable()
 export class UtilsService {
@@ -28,16 +29,15 @@ export class UtilsService {
     return { refreshToken, accessToken };
   }
 
+  //dayjs 받아서 사용
   makeKrDate(date: Date): Date {
     const correctedDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
     return correctedDate;
   }
 
   pagenation(query, page: number) {
-    const limitNumber = 12;
-    const skip = page ? (page - 1) * limitNumber : 0;
+    const skip = page ? (page - 1) * PageEnum.LIMIT : 0;
 
-    return query.take(limitNumber).skip(skip);
+    return query.take(PageEnum.LIMIT).skip(skip);
   }
-  //dayjs 받아서 사용
 }

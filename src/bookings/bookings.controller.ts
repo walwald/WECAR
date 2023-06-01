@@ -1,9 +1,9 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -18,11 +18,11 @@ import { Booking } from './entities';
 @Controller('bookings')
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
-  //param pipe
+  //param pipe적용
   @Post(':hostCarId')
   @UseGuards(AuthGuard('jwt-user'))
   createBooking(
-    @Param('hostCarId') hostCarId: number,
+    @Param('hostCarId', ParseIntPipe) hostCarId: number,
     @Body() bookingInfo: BookingDto,
     @User() { id: userId }: ReqUser,
   ): Promise<Booking> {
@@ -35,12 +35,12 @@ export class BookingsController {
     return this.bookingsService.getBookingsByHost(hostId);
   }
 
-  @Get(':hostCarId')
+  @Get(':uuid')
   @UseGuards(AuthGuard('jwt-user'))
-  getRecentBooking(
-    @Param('hostCarId') hostCarId: number,
+  getBookingInfo(
+    @Param('uuid') uuid: string,
     @User() { id: userId }: ReqUser,
   ): Promise<Booking> {
-    return this.bookingsService.getRecentBooking(hostCarId, userId);
+    return this.bookingsService.getBookingInfo(uuid, userId);
   }
 }

@@ -1,16 +1,18 @@
 import {
+  BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Booking } from './entities';
+import { Booking, BookingStatus } from './entities';
 import { v4 as uuid } from 'uuid';
 import { BookingDto } from './dto/booking.dto';
-import { BookingStatusEnum } from 'src/enums/booking.enum';
+import { BookingStatusEnum, CommissionEnum } from 'src/bookings/booking.enum';
 import { HostCar } from 'src/cars/entities';
-import { Cron } from '@nestjs/schedule';
 import { UtilsService } from 'src/utils/utils.service';
 
 @Injectable()
@@ -20,8 +22,19 @@ export class BookingsService {
     private bookingRepository: Repository<Booking>,
     @InjectRepository(HostCar)
     private hostCarRepository: Repository<HostCar>,
+    @Inject(forwardRef(() => UtilsService))
     private utilsService: UtilsService,
+    @InjectRepository(BookingStatus)
+    private bookingStatusRepository: Repository<BookingStatus>,
   ) {}
+
+  async getBookingStatus(statusMessage: string): Promise<BookingStatus> {
+    const status = await this.bookingStatusRepository.findOneBy({
+      name: BookingStatusEnum[statusMessage],
+    });
+    if (!status) throw new NotFoundException('Booking Status is Undefined');
+    return status;
+  }
 
   //find 에서 lock을 걸 수 있음 entityManager로. 생성 주기에는 접근 불가
   //수수료 확인 logic - rate 바뀌면 오류 나도록
@@ -46,6 +59,14 @@ export class BookingsService {
       }
     });
 
+    if (
+      bookingInfo.totalPrice * CommissionEnum.RATE !==
+      bookingInfo.commission
+    ) {
+      throw new BadRequestException('Wrong Commission Amount');
+    }
+
+    const status = await this.getBookingStatus('PROCESSING');
     const bookingEntry = this.bookingRepository.create({
       ...bookingInfo,
       startDate: newStartDate,
@@ -53,15 +74,14 @@ export class BookingsService {
       uuid: uuid(),
       hostCar: { id: hostCarId },
       user: { id: userId },
-      status: { id: BookingStatusEnum.PROCESSING },
+      status,
     });
 
     await this.bookingRepository.save(bookingEntry);
     return bookingEntry;
   }
 
-  //uuid 받아서 find
-  async getRecentBooking(hostCarId: number, userId: number): Promise<Booking> {
+  async getBookingInfo(uuid: string, userId: number): Promise<Booking> {
     const bookingInfo = await this.bookingRepository
       .createQueryBuilder('booking')
       .leftJoinAndSelect('booking.hostCar', 'hostCar')
@@ -69,7 +89,7 @@ export class BookingsService {
       .leftJoinAndSelect('hostCar.carModel', 'carModel')
       .leftJoinAndSelect('carModel.brand', 'brand')
       .leftJoinAndSelect('booking.user', 'user')
-      .where('hostCar.id = :hostCarId', { hostCarId })
+      .where('booking.uuid = :uuid', { uuid })
       .andWhere('user.id = :userId', { userId })
       .select([
         'booking',
@@ -80,11 +100,10 @@ export class BookingsService {
         'hostCar.pricePerDay',
         'files.url',
       ])
-      .orderBy('booking.createdAt', 'DESC')
       .getOne();
 
     if (!bookingInfo)
-      throw new NotFoundException('Invalid User or Host Car Id');
+      throw new NotFoundException('Invalid User or Booking uuid');
 
     bookingInfo.startDate = this.utilsService.makeKrDate(bookingInfo.startDate);
     bookingInfo.endDate = this.utilsService.makeKrDate(bookingInfo.endDate);
@@ -92,7 +111,7 @@ export class BookingsService {
     return bookingInfo;
   }
 
-  //paging
+  //paging 추가
   async getBookingsByHost(hostId: number): Promise<Booking[]> {
     const bookingList = await this.bookingRepository.find({
       where: { hostCar: { host: { id: hostId } } },

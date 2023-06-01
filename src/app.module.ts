@@ -41,7 +41,7 @@ import { PaymentSubscriber } from './payments/payment.subscriber';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       entities: [__dirname + '/**/entities/*.entity.ts'],
-      synchronize: false,
+      synchronize: true,
       autoLoadEntities: true,
       charset: 'utf8mb4',
       logging: true,
