@@ -10,7 +10,7 @@ import { EntityManager, Repository } from 'typeorm';
 import { Booking } from 'src/bookings/entities';
 import { TossKeyDto } from './dto/toss-key.dto';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom, lastValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { PaymentStatusEnum } from './payment.enum';
 import { BookingsService } from 'src/bookings/bookings.service';
 
