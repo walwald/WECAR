@@ -12,7 +12,6 @@ export class RtAuthGuard extends NestAuthGuard('jwt-rt') {
   }
 
   handleRequest(err: any, rt: any, Info: any) {
-    console.log('err:', err, 'user: ', rt, 'info: ', Info);
     if (err || !rt) {
       throw err || new UnauthorizedException(Info);
     }

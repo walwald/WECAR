@@ -12,7 +12,6 @@ export class HostAuthGuard extends NestAuthGuard('jwt-host') {
   }
 
   handleRequest(err: any, host: any, Info: any) {
-    console.log('err:', err, 'user: ', host, 'info: ', Info);
     if (err || !host) {
       throw err || new UnauthorizedException(Info);
     }
