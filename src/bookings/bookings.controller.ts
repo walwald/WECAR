@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { BookingsService } from './bookings.service';
 import { BookingDto } from './dto/booking.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -35,12 +27,12 @@ export class BookingsController {
     return this.bookingsService.getBookingsByHost(hostId);
   }
 
-  @Get(':hostCarId')
+  @Get(':uuid')
   @UseGuards(AuthGuard('jwt-user'))
-  getRecentBooking(
-    @Param('hostCarId') hostCarId: number,
+  getBookingInfo(
+    @Param('uuid') uuid: string,
     @User() { id: userId }: ReqUser,
   ): Promise<Booking> {
-    return this.bookingsService.getRecentBooking(hostCarId, userId);
+    return this.bookingsService.getBookingInfo(uuid, userId);
   }
 }

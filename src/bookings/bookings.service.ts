@@ -10,7 +10,6 @@ import { v4 as uuid } from 'uuid';
 import { BookingDto } from './dto/booking.dto';
 import { BookingStatusEnum } from 'src/enums/booking.enum';
 import { HostCar } from 'src/cars/entities';
-import { Cron } from '@nestjs/schedule';
 import { UtilsService } from 'src/utils/utils.service';
 
 @Injectable()
@@ -60,8 +59,7 @@ export class BookingsService {
     return bookingEntry;
   }
 
-  //uuid 받아서 find
-  async getRecentBooking(hostCarId: number, userId: number): Promise<Booking> {
+  async getBookingInfo(uuid: string, userId: number): Promise<Booking> {
     const bookingInfo = await this.bookingRepository
       .createQueryBuilder('booking')
       .leftJoinAndSelect('booking.hostCar', 'hostCar')
@@ -69,7 +67,7 @@ export class BookingsService {
       .leftJoinAndSelect('hostCar.carModel', 'carModel')
       .leftJoinAndSelect('carModel.brand', 'brand')
       .leftJoinAndSelect('booking.user', 'user')
-      .where('hostCar.id = :hostCarId', { hostCarId })
+      .where('booking.uuid = :uuid', { uuid })
       .andWhere('user.id = :userId', { userId })
       .select([
         'booking',
@@ -80,11 +78,10 @@ export class BookingsService {
         'hostCar.pricePerDay',
         'files.url',
       ])
-      .orderBy('booking.createdAt', 'DESC')
       .getOne();
 
     if (!bookingInfo)
-      throw new NotFoundException('Invalid User or Host Car Id');
+      throw new NotFoundException('Invalid User or Booking uuid');
 
     bookingInfo.startDate = this.utilsService.makeKrDate(bookingInfo.startDate);
     bookingInfo.endDate = this.utilsService.makeKrDate(bookingInfo.endDate);
