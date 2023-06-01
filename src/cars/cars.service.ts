@@ -346,15 +346,20 @@ export class CarsService {
       query.andWhere('option.name IN (:options)', { options: filter.options });
     }
 
-    this.utilsService.pagenation(query, filter.page);
-    const filteredCars = await query.getMany();
+    const allFilteredCars = await query.getMany();
 
-    filteredCars.forEach((car) => {
+    const totalCount = allFilteredCars.length;
+
+    await this.utilsService.pagenation(query, filter.page);
+
+    const pageantedCars = await query.getMany();
+
+    pageantedCars.forEach((car) => {
       car.startDate = this.utilsService.makeKrDate(car.startDate);
       car.endDate = this.utilsService.makeKrDate(car.endDate);
     });
 
-    return { totalCount: filteredCars.length, hostCars: filteredCars };
+    return { totalCount, hostCars: pageantedCars };
   }
 
   //querybuilder 구성 - 완전히 같으면 함수로 변경
