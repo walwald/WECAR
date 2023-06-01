@@ -10,7 +10,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get('check/user')
-  @UseGuards(NestAuthGuard)
+  @UseGuards(AuthGuard('jwt-user'))
   isAuthenticatedUser(@User() user: ReqUser): Payload {
     return { id: user.id, name: user.name };
   }
