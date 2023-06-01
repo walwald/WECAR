@@ -1,18 +1,17 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { Payment, TossInfo } from './entities';
+import { Payment, PaymentStatus, TossInfo } from './entities';
 import { EntityManager, Repository } from 'typeorm';
 import { Booking } from 'src/bookings/entities';
-import { PaymentStatusEnum } from 'src/enums/payment.enum';
 import { TossKeyDto } from './dto/toss-key.dto';
-import { BookingStatusEnum } from 'src/enums/booking.enum';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { PaymentStatusEnum } from './payment.enum';
+import { BookingsService } from 'src/bookings/bookings.service';
 
 @Injectable()
 export class PaymentsService {
@@ -26,7 +25,18 @@ export class PaymentsService {
     @InjectEntityManager()
     private entityManager: EntityManager,
     private httpService: HttpService,
+    @InjectRepository(PaymentStatus)
+    private paymentStatusRepository: Repository<PaymentStatus>,
+    private bookingsService: BookingsService,
   ) {}
+
+  async getPaymentStatus(statusMessage: string): Promise<PaymentStatus> {
+    const status = await this.paymentStatusRepository.findOneBy({
+      name: PaymentStatusEnum[statusMessage],
+    });
+    if (!status) throw new NotFoundException('Booking Status is Undefined');
+    return status;
+  }
 
   async createPayment(bookingUuid: string, method: string): Promise<Payment> {
     const booking = await this.bookingRepository.findOneBy({
@@ -35,10 +45,11 @@ export class PaymentsService {
 
     if (!booking) throw new NotFoundException('Invalid Booking uuid');
 
+    const status = await this.getPaymentStatus('WAITING');
     const paymentEntry = this.paymentRepository.create({
       booking,
       method,
-      status: { id: PaymentStatusEnum.WAITING },
+      status,
     });
 
     await this.paymentRepository.save(paymentEntry);
@@ -56,16 +67,20 @@ export class PaymentsService {
 
       if (!payment) throw new NotFoundException('Create Payment First');
 
+      const paymentStatus = await this.getPaymentStatus('SUCCESS');
       await entityManager.update(
         Payment,
         { booking: { uuid: tossKey.orderId } },
-        { id: payment.id, status: { id: PaymentStatusEnum.SUCCESS } },
+        { id: payment.id, status: paymentStatus },
       );
 
+      const bookingStatus = await this.bookingsService.getBookingStatus(
+        'BOOKED',
+      );
       await entityManager.update(
         Booking,
         { uuid: tossKey.orderId },
-        { uuid: tossKey.orderId, status: { id: BookingStatusEnum.BOOKED } },
+        { uuid: tossKey.orderId, status: bookingStatus },
       );
 
       //환경 변수로 key, domain도 상수로 빼기

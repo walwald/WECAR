@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { UtilsService } from './utils.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HostCar } from 'src/cars/entities';
 import { Repository } from 'typeorm';
 import { Cron } from '@nestjs/schedule';
-import { BookingStatusEnum } from 'src/enums/booking.enum';
 import { Booking } from 'src/bookings/entities';
+import { BookingsService } from 'src/bookings/bookings.service';
 
 @Injectable()
 export class SchedulerService {
@@ -15,6 +15,8 @@ export class SchedulerService {
     private hostCarRepository: Repository<HostCar>,
     @InjectRepository(Booking)
     private bookingRepository: Repository<Booking>,
+    @Inject(forwardRef(() => BookingsService))
+    private bookingsService: BookingsService,
   ) {}
 
   @Cron('0 0 * * *')
@@ -34,13 +36,11 @@ export class SchedulerService {
   async updateBookingStatus(): Promise<void> {
     const allBookings = await this.bookingRepository.find();
     const now = new Date();
+    const status = await this.bookingsService.getBookingStatus('RETURNTIME');
     allBookings.forEach((booking) => {
       const bookingEndDate = this.utilsService.makeKrDate(booking.endDate);
       if (now > bookingEndDate) {
-        this.bookingRepository.update(
-          { uuid: booking.uuid },
-          { status: { id: BookingStatusEnum.RETURNTIME } },
-        );
+        this.bookingRepository.update({ uuid: booking.uuid }, { status });
       }
     });
     return;

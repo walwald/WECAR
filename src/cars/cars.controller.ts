@@ -12,10 +12,10 @@ import { CarsService } from './cars.service';
 import { Brand, CarModel, HostCar, Option } from './entities';
 import { User } from 'src/utils/decorators/user.decorator';
 import { ReqUser } from 'src/auth/types';
-import { AuthGuard } from '@nestjs/passport';
 import { DeleteResult } from 'typeorm';
 import { CarFilterDto, CarRegisterDto, NewModelDto } from './dto';
 import { FilteredList } from './types/filtered-list.interface';
+import { HostAuthGuard } from 'src/auth/security';
 
 @Controller('cars')
 export class CarsController {
@@ -52,7 +52,7 @@ export class CarsController {
   }
 
   @Post('host')
-  @UseGuards(AuthGuard('jwt-host'))
+  @UseGuards(HostAuthGuard)
   registerNewHostCar(
     @Body()
     { newHostCar, files }: CarRegisterDto,
@@ -62,13 +62,13 @@ export class CarsController {
   }
 
   @Delete('host')
-  @UseGuards(AuthGuard('jwt-host'))
+  @UseGuards(HostAuthGuard)
   deleteHostCar(@User() host: ReqUser): Promise<DeleteResult> {
     return this.carsService.deleteHostCar(host.id);
   }
 
   @Get('host')
-  @UseGuards(AuthGuard('jwt-host'))
+  @UseGuards(HostAuthGuard)
   getCarByHost(@User() host: ReqUser): Promise<HostCar> {
     return this.carsService.getCarByHost(host.id);
   }

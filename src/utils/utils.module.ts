@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { UtilsService } from './utils.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -8,6 +8,7 @@ import { SchedulerService } from './scheduler.service';
 import { HostCar } from 'src/cars/entities';
 import { Booking } from 'src/bookings/entities';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { BookingsModule } from 'src/bookings/bookings.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       }),
     }),
     TypeOrmModule.forFeature([HostCar, Booking]),
+    forwardRef(() => BookingsModule),
   ],
   exports: [UtilsService],
   controllers: [UtilsController],
