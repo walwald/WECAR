@@ -6,7 +6,6 @@ import { Repository } from 'typeorm';
 import { Cron } from '@nestjs/schedule';
 import { Booking } from 'src/bookings/entities';
 import { BookingsService } from 'src/bookings/bookings.service';
-import { BookingsModule } from 'src/bookings/bookings.module';
 
 @Injectable()
 export class SchedulerService {
