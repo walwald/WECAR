@@ -4,8 +4,8 @@ import { SignupHostDto } from './dto/signup.host.dto';
 import { SigninAuthDto } from 'src/auth/dto/signin-auth.dto';
 import { Request } from 'express';
 import { ReqUser, Tokens } from 'src/auth/types';
-import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/utils/decorators/user.decorator';
+import { RtAuthGuard } from 'src/auth/security/rt-auth.guard';
 
 @Controller('hosts')
 export class HostsController {
@@ -26,7 +26,7 @@ export class HostsController {
   }
 
   @Get('refresh')
-  @UseGuards(AuthGuard('jwt-refresh'))
+  @UseGuards(RtAuthGuard)
   refreshHostAccessToken(@User() user: ReqUser): Promise<Tokens> {
     return this.hostsService.refreshAccessToken(user);
   }

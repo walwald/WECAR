@@ -6,7 +6,7 @@ import { Payload, ReqUser } from '../types';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
+export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
   constructor(private readonly config: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

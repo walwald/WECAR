@@ -1,9 +1,9 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import AuthService from './auth.service';
-import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/utils/decorators/user.decorator';
 import { Payload, ReqUser } from './types';
 import { UserAuthGuard } from './security';
+import { HostAuthGuard } from './security/host-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -16,7 +16,7 @@ export class AuthController {
   }
 
   @Get('check/host')
-  @UseGuards(AuthGuard('jwt-host'))
+  @UseGuards(HostAuthGuard)
   isAuthenticatedHost(@User() user: ReqUser): Payload {
     return { id: user.id, name: user.name };
   }
