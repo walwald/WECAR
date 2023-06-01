@@ -14,10 +14,11 @@ import { User } from 'src/utils/decorators/user.decorator';
 import { ReqUser } from 'src/auth/types';
 import { Booking } from './entities';
 
+//controller 자체에 guard 설정 가능
 @Controller('bookings')
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
-
+  //param pipe
   @Post(':hostCarId')
   @UseGuards(AuthGuard('jwt-user'))
   createBooking(
@@ -41,14 +42,5 @@ export class BookingsController {
     @User() { id: userId }: ReqUser,
   ): Promise<Booking> {
     return this.bookingsService.getRecentBooking(hostCarId, userId);
-  }
-
-  @Delete(':hostCarId')
-  @UseGuards(AuthGuard('jwt-user'))
-  deleteRecentBooking(
-    @Param('hostCarId') hostCarId: number,
-    @User() { id: userId }: ReqUser,
-  ): Promise<Booking> {
-    return this.bookingsService.deleteRecentBooking(hostCarId, userId);
   }
 }

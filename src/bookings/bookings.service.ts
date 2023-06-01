@@ -23,6 +23,8 @@ export class BookingsService {
     private utilsService: UtilsService,
   ) {}
 
+  //find 에서 lock을 걸 수 있음 entityManager로. 생성 주기에는 접근 불가
+  //수수료 확인 logic - rate 바뀌면 오류 나도록
   async createBooking(
     hostCarId: number,
     bookingInfo: BookingDto,
@@ -58,6 +60,7 @@ export class BookingsService {
     return bookingEntry;
   }
 
+  //uuid 받아서 find
   async getRecentBooking(hostCarId: number, userId: number): Promise<Booking> {
     const bookingInfo = await this.bookingRepository
       .createQueryBuilder('booking')
@@ -89,6 +92,7 @@ export class BookingsService {
     return bookingInfo;
   }
 
+  //paging
   async getBookingsByHost(hostId: number): Promise<Booking[]> {
     const bookingList = await this.bookingRepository.find({
       where: { hostCar: { host: { id: hostId } } },
@@ -112,34 +116,5 @@ export class BookingsService {
     });
 
     return bookingList;
-  }
-
-  @Cron('0 0 * * *')
-  async updateBookingStatus(): Promise<void> {
-    const allBookings = await this.bookingRepository.find();
-    const now = new Date();
-    allBookings.forEach((booking) => {
-      const bookingEndDate = this.utilsService.makeKrDate(booking.endDate);
-      if (now > bookingEndDate) {
-        this.bookingRepository.update(
-          { uuid: booking.uuid },
-          { status: { id: BookingStatusEnum.RETURNTIME } },
-        );
-      }
-    });
-    return;
-  }
-
-  async deleteRecentBooking(hostCarId: number, userId: number): Promise<any> {
-    const bookingInfo = await this.bookingRepository.delete({
-      hostCar: { id: hostCarId },
-      user: { id: userId },
-      status: { id: BookingStatusEnum.PROCESSING },
-    });
-
-    if (!bookingInfo)
-      throw new NotFoundException('Invalid User or Host Car Id');
-
-    return bookingInfo;
   }
 }
