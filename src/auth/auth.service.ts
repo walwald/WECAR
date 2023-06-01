@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
-import { Host } from 'src/payments/hosts/entities/host.entity';
+import { Host } from 'src/hosts/entities/host.entity';
 import { UtilsService } from 'src/utils/utils.service';
 import { Payload } from './types';
 
