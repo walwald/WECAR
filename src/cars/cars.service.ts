@@ -248,6 +248,7 @@ export class CarsService {
       .leftJoinAndSelect('carModel.engineSize', 'engineSize')
       .leftJoinAndSelect('carModel.carType', 'carType')
       .where('hostCar.status = true')
+      .orderBy('hostCar.id', 'DESC')
       .groupBy('hostCar.id')
       .select([
         'hostCar.id',
