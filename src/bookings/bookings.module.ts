@@ -16,5 +16,6 @@ import { UtilsModule } from 'src/utils/utils.module';
   ],
   controllers: [BookingsController],
   providers: [BookingsService],
+  exports: [BookingsService],
 })
 export class BookingsModule {}

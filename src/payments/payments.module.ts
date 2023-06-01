@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { PaymentsController } from './payments.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -6,7 +6,6 @@ import { Payment, PaymentLog, PaymentStatus, TossInfo } from './entities';
 import { BookingsModule } from 'src/bookings/bookings.module';
 import { Booking } from 'src/bookings/entities';
 import { HttpModule } from '@nestjs/axios';
-import { UtilsModule } from 'src/utils/utils.module';
 
 @Module({
   imports: [

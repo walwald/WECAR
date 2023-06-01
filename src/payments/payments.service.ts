@@ -1,9 +1,7 @@
 import {
-  Inject,
   Injectable,
   NotFoundException,
   ServiceUnavailableException,
-  forwardRef,
 } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Payment, PaymentStatus, TossInfo } from './entities';
@@ -12,7 +10,6 @@ import { Booking } from 'src/bookings/entities';
 import { TossKeyDto } from './dto/toss-key.dto';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { UtilsService } from 'src/utils/utils.service';
 import { PaymentStatusEnum } from './payment.enum';
 import { BookingsService } from 'src/bookings/bookings.service';
 
