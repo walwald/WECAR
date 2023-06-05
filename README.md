@@ -3,10 +3,10 @@
 </p>
 
 # WECAR - backend c2c 차량 대여 중계 플랫폼 프로젝트
-장다희([**Github**](https://github.com/walwald), [회고록](https://walwaldev.tistory.com/57))<br>
+장다희([**Github**](https://github.com/walwald), [회고록](https://walwaldev.tistory.com))<br>
 
 <br>
-> **3차 팀 프로젝트 <br>
+> 3차 팀 프로젝트 <br>
 c2c 공간 대여 중계 플랫폼 Airbnb를 모델링하여 c2c 차량 대여 중계 플랫폼 WECAR 웹사이트 제작<br>
 
 > **짧은 프로젝트 기간동안 개발에 집중해야 하므로 디자인/기획 부분만 클론했습니다.<br>
@@ -43,13 +43,12 @@ c2c 공간 대여 중계 플랫폼 Airbnb를 모델링하여 c2c 차량 대여 �
 <br>
 
 
- ## 📍[ERD](https://dbdiagram.io/d/64426bdf6b31947051f9b394)
- > User가 구매자이자 판매자가 될 수 있으며, 하나의 Product에 구매 입찰과 판매 입찰이 동시에 이루어진다는 점에 주안점을 두고 데이터베이스 모델을 구축하였습니다. <br><br>
-![DREAM (3)](https://github.com/wecode-bootcamp-korea/44-2nd-Dream-backend/assets/120387100/b18561e6-0888-4aaa-8eaa-452122d73e11)
+ ## 📍[ERD](https://dbdiagram.io/d/645ca847dca9fb07c4e4dd14)
+ > <br><br>
+[ERD png]
 
-
- ## 📍[Postman](https://documenter.getpostman.com/view/26858291/2s93eWzskR)
+ ## 📍[Postman](https://documenter.getpostman.com/view/26388948/2s93eeQUpz)
 > Postman의 Documentation을 프로젝트 진행 시 프론트엔드와의 소통 및 협업 도구로 활용하였습니다. <br><br>
-<img width="1512" alt="스크린샷 2023-05-18 23 35 50" src="https://github.com/wecode-bootcamp-korea/44-2nd-Dream-backend/assets/120387100/3bff3e11-24d2-495c-81e4-f815da108948"><br>
+<br>
 
  <br>
