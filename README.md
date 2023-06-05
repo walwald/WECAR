@@ -2,11 +2,10 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
 
-# WECAR - backend c2c 차량 대여 중계 플랫폼 프로젝트
+# WECAR - backend
 장다희([**Github**](https://github.com/walwald), [회고록](https://walwaldev.tistory.com))<br>
 
-<br>
-> 3차 팀 프로젝트 <br>
+**3차 팀 프로젝트** <br>
 c2c 공간 대여 중계 플랫폼 Airbnb를 모델링하여 c2c 차량 대여 중계 플랫폼 WECAR 웹사이트 제작<br>
 
 > **짧은 프로젝트 기간동안 개발에 집중해야 하므로 디자인/기획 부분만 클론했습니다.<br>
@@ -28,12 +27,18 @@ c2c 공간 대여 중계 플랫폼 Airbnb를 모델링하여 c2c 차량 대여 �
 
 * BackEnd   
 
- |TypeScript|Nestjs|Jest|MySql|Rest|Prettier|Docker|AWS|
-|---|---|---|---|---|---|---|---|
-|<div style="display: flex; align-items: flex-start;"><img src="https://techstack-generator.vercel.app/js-icon.svg" alt="icon" width="65" height="65" /></div>| <div style="display: flex; align-items: flex-start;"><img src="https://techstack-generator.vercel.app/nginx-icon.svg" alt="icon" width="65" height="65" /></div>|<div style="display: flex; align-items: flex-start;"><img src="https://techstack-generator.vercel.app/jest-icon.svg" alt="icon" width="65" height="65" /></div>|<div style="display: flex; align-items: flex-start;"><img src="https://techstack-generator.vercel.app/mysql-icon.svg" alt="icon" width="65" height="65" /></div>|<div style="display: flex; align-items: flex-start;"><img src="https://techstack-generator.vercel.app/restapi-icon.svg" alt="icon" width="65" height="65" /></div>|<div style="display: flex; align-items: flex-start;"><img src="https://techstack-generator.vercel.app/prettier-icon.svg" alt="icon" width="65" height="65" /></div>|<div style="display: flex; align-items: flex-start;"><img src="https://techstack-generator.vercel.app/docker-icon.svg" alt="icon" width="65" height="65" /></div>|<div style="display: flex; align-items: flex-start;"><img src="https://techstack-generator.vercel.app/aws-icon.svg" alt="icon" width="65" height="65" /></div>|
-<br>
+TypeScript
+NestJS
+JWT
+Jest
+TypeOrm
+MySql
+Rest
+Prettier
+Docker
+AWS
 
-* 협업 <br><br>
+* 협업 <br>
 
 <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white"> <br>
 <img src="https://img.shields.io/badge/trello-0055cc?style=for-the-badge&logo=trello&logoColor=yellow"> <br>
