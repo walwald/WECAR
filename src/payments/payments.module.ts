@@ -6,9 +6,11 @@ import { Payment, PaymentLog, PaymentStatus, TossInfo } from './entities';
 import { BookingsModule } from 'src/bookings/bookings.module';
 import { Booking } from 'src/bookings/entities';
 import { HttpModule } from '@nestjs/axios';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule,
     TypeOrmModule.forFeature([
       Payment,
       PaymentStatus,

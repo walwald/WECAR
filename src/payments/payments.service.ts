@@ -13,6 +13,7 @@ import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { PaymentStatusEnum } from './payment.enum';
 import { BookingsService } from 'src/bookings/bookings.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PaymentsService {
@@ -21,14 +22,13 @@ export class PaymentsService {
     private paymentRepository: Repository<Payment>,
     @InjectRepository(Booking)
     private bookingRepository: Repository<Booking>,
-    @InjectRepository(TossInfo)
-    private tossInfoRepository: Repository<TossInfo>,
     @InjectEntityManager()
     private entityManager: EntityManager,
     private httpService: HttpService,
     @InjectRepository(PaymentStatus)
     private paymentStatusRepository: Repository<PaymentStatus>,
     private bookingsService: BookingsService,
+    private config: ConfigService,
   ) {}
 
   async getPaymentStatus(statusMessage: string): Promise<PaymentStatus> {
@@ -47,6 +47,15 @@ export class PaymentsService {
     if (!booking) throw new NotFoundException('Invalid Booking uuid');
 
     const status = await this.getPaymentStatus('WAITING');
+
+    const payment = await this.paymentRepository.findOneBy({
+      booking: { uuid: booking.uuid },
+    });
+
+    if (payment) {
+      return payment;
+    }
+
     const paymentEntry = this.paymentRepository.create({
       booking,
       method,
@@ -83,31 +92,31 @@ export class PaymentsService {
         { uuid: tossKey.orderId, status: bookingStatus },
       );
 
-      //환경 변수로 key, domain도 상수로 빼기
       const encodedKey = Buffer.from(
-        `test_sk_O6BYq7GWPVvZLZ1W5klVNE5vbo1d:`,
+        `${this.config.get('TOSS_KEY')}:`,
       ).toString('base64');
+
+      const options = {
+        method: 'POST',
+        url: `${this.config.get('TOSS_URL')}`,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${encodedKey}`,
+        },
+        data: {
+          paymentKey: tossKey.paymentKey,
+          amount: tossKey.amount,
+          orderId: tossKey.orderId,
+        },
+      };
+
+      const response = await lastValueFrom(this.httpService.request(options));
+
+      if (!response.data) {
+        throw new ServiceUnavailableException('Toss Info Connection Error');
+      }
+
       try {
-        const options = {
-          method: 'POST',
-          url: 'https://api.tosspayments.com/v1/payments/confirm',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Basic ${encodedKey}`,
-          },
-          data: {
-            paymentKey: tossKey.paymentKey,
-            amount: tossKey.amount,
-            orderId: tossKey.orderId,
-          },
-        };
-
-        //lastValueFrom을 더 많이 씀 - observable
-        const response = await lastValueFrom(this.httpService.request(options));
-
-        if (!response.data) {
-          throw new ServiceUnavailableException('Toss Info Connection Error');
-        }
         const tossInfoEntry = entityManager.create(TossInfo, {
           status: response.data.status,
           currency: response.data.currency,
@@ -123,7 +132,9 @@ export class PaymentsService {
       } catch (err) {
         const options = {
           method: 'POST',
-          url: 'https://api.tosspayments.com/v1/payments/5zJ4xY7m0kODnyRpQWGrN2xqGlNvLrKwv1M9ENjbeoPaZdL6/cancel',
+          url: `${this.config.get('TOSS_CANCEL_URL')}/${
+            tossKey.paymentKey
+          }/cancel`,
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Basic ${encodedKey}`,

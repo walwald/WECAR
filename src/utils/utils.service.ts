@@ -25,7 +25,7 @@ export class UtilsService {
   createTokens(id: number, name: string): Tokens {
     const payload: Payload = { id, name };
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '14d' });
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '3m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '2h' });
     return { refreshToken, accessToken };
   }
 
