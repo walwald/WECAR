@@ -29,7 +29,6 @@ export class UtilsService {
     return { refreshToken, accessToken };
   }
 
-  //dayjs 받아서 사용
   makeKrDate(date: Date): Date {
     const correctedDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
     return correctedDate;

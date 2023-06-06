@@ -1,6 +1,5 @@
 import { IsDateString, IsNotEmpty, IsNumber } from 'class-validator';
 
-//isnotempty 순서 확인
 export class BookingDto {
   @IsDateString()
   @IsNotEmpty()

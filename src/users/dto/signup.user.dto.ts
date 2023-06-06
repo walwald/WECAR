@@ -13,16 +13,18 @@ export class SignupUserDto extends SigninAuthDto {
   readonly name: string;
 
   @IsPhoneNumber('KR')
+  @IsNotEmpty()
   readonly phoneNumber: string;
 
   @IsString()
+  @IsNotEmpty()
   readonly driversLicenseNumber: string;
 
   @IsDateString()
+  @IsNotEmpty()
   readonly birthday: Date;
 
   @IsBoolean()
+  @IsNotEmpty()
   readonly marketingAgreement: boolean;
 }
-
-//IsNotEmpty() 같은 벨리데이터 추가

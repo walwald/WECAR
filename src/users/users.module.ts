@@ -18,5 +18,3 @@ import { AuthModule } from 'src/auth/auth.module';
   providers: [UsersService],
 })
 export class UsersModule {}
-
-//typeorommodule export 확인
