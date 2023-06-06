@@ -133,6 +133,10 @@ export class CarsService {
 
   async createOption(options: string[]): Promise<Option[]> {
     const optionList = options.map((option) => {
+      const existingOption = this.optionRepository.findOneBy({
+        name: `${option}`,
+      });
+      if (existingOption) return existingOption;
       const createdOption = this.optionRepository.create({ name: `${option}` });
       this.optionRepository.save(createdOption);
       return createdOption;
@@ -227,12 +231,13 @@ export class CarsService {
       where: { host: { id: hostId } },
     });
 
+    if (!hostCar) throw new NotFoundException('There is No Registered Car');
+
     hostCar.startDate = this.utilsService.makeKrDate(hostCar.startDate);
     hostCar.endDate = this.utilsService.makeKrDate(hostCar.endDate);
     return hostCar;
   }
 
-  //페이지 로직 따로 있는 게 좋음 - paging service OR dto, limit도 따로 빼놓는 게 좋음
   async getHostCars(filter: CarFilterDto): Promise<FilteredList> {
     if (!filter.startDate !== !filter.endDate)
       throw new BadRequestException('One of Start date or End date is Missnig');
@@ -299,7 +304,6 @@ export class CarsService {
       });
     }
 
-    //일치하는 경우 함수로 만들 수 있음
     if (filter.brand) {
       query.andWhere('brand.name = :brand', {
         brand: `${filter.brand}`,
@@ -362,7 +366,6 @@ export class CarsService {
     return { totalCount, hostCars: pageantedCars };
   }
 
-  //querybuilder 구성 - 완전히 같으면 함수로 변경
   async getHostCarDetail(id: number): Promise<HostCar> {
     const hostCar = await this.hostCarRepository
       .createQueryBuilder('hostCar')

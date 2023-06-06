@@ -48,8 +48,9 @@ export class PaymentsService {
 
     const status = await this.getPaymentStatus('WAITING');
 
-    const payment = await this.paymentRepository.findOneBy({
-      booking: { uuid: booking.uuid },
+    const payment = await this.paymentRepository.findOne({
+      where: { booking: { uuid: booking.uuid } },
+      relations: { booking: true, status: true },
     });
 
     if (payment) {

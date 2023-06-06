@@ -7,34 +7,34 @@ import {
 } from 'class-validator';
 
 export class NewHostCarDto {
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   readonly carNumber: string;
 
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   carModel: string;
 
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   fuelType: string;
 
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   readonly address: string;
 
-  @IsNumber()
   @IsNotEmpty()
+  @IsNumber()
   readonly pricePerDay: number;
 
   @IsArray()
   readonly options: string[];
 
-  @IsDateString()
   @IsNotEmpty()
+  @IsDateString()
   readonly startDate: Date;
 
-  @IsDateString()
   @IsNotEmpty()
+  @IsDateString()
   readonly endDate: Date;
 }
