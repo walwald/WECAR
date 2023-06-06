@@ -13,18 +13,18 @@ c2c 공간 대여 중계 플랫폼 Airbnb를 모델링하여, c2c 차량 대여 
 * 개발 인원:  
   `Frontend`: 김영운 <br>
   `Backend`: 장다희 <br>
-* [프론트엔드 Github 저장소](https://github.com/)
+* [프론트엔드 Github 저장소](https://github.com/KIMYOUNGWOON/44-3rd-wecar.git)
 * 모델링한 사이트: [Airbnb](https://www.airbnb.co.kr/)
 <br>
 
 ## 📍사용 기술
 
-* **Backend** <br> 버전 적기
-TypeScript <br>
-NestJS <br>
+* **Backend** <br>
+TypeScript 4.7 <br>
+NestJS v9<br>
 JWT <br>
-TypeOrm <br>
-MySql <br>
+TypeOrm 0.3<br>
+MySql 5.7<br>
 Rest <br>
 Prettier <br>
 Docker <br>
@@ -42,11 +42,13 @@ Notion <br>
 
  ## 📍[ERD](https://dbdiagram.io/d/645ca847dca9fb07c4e4dd14)
  일반 user, host, 차량 모델, 등록 차량(host car), 예약, 결제를 중점적으로 ERD를 설계하였습니다. <br><br>
- 
+ ![WECAR](https://github.com/walwald/WECAR/assets/120387100/5bddd524-366a-4fc4-9a58-f32210aec9be)
+
 <br>
 
  ## 📍[Postman](https://documenter.getpostman.com/view/26388948/2s93eeQUpz)
- 프로젝트 진행 시 Postman의 Documentation을 활용하여 프론트엔드와 소통하였습니다. <br><br>
+ 프로젝트 진행 시 Postman의 Documentation을 publsih하여 프론트엔드와 소통하였습니다. <br>
+ client가 사용한 모든 API를 Postman에서 확인할 수 있습니다.<br>
  <img width="1512" alt="스크린샷 2023-06-06 17 53 46" src="https://github.com/walwald/WECAR/assets/120387100/4f9d453e-83bd-482b-8332-4537be228fcb">
 
 <br>
