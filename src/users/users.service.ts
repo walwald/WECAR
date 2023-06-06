@@ -31,7 +31,6 @@ export class UsersService {
     return user;
   }
 
-  //주석 작성 메서드용 주석 JS Doc
   async signup(userData: SignupUserDto): Promise<Tokens> {
     const { phoneNumber, email, driversLicenseNumber } = userData;
 

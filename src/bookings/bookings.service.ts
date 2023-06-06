@@ -36,8 +36,6 @@ export class BookingsService {
     return status;
   }
 
-  //find 에서 lock을 걸 수 있음 entityManager로. 생성 주기에는 접근 불가
-  //수수료 확인 logic - rate 바뀌면 오류 나도록
   async createBooking(
     hostCarId: number,
     bookingInfo: BookingDto,
@@ -112,7 +110,6 @@ export class BookingsService {
     return bookingInfo;
   }
 
-  //paging 추가
   async getBookingsByHost(hostId: number): Promise<Booking[]> {
     const bookingList = await this.bookingRepository.find({
       where: { hostCar: { host: { id: hostId } } },

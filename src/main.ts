@@ -17,5 +17,3 @@ async function bootstrap() {
   await app.listen(3000);
 }
 bootstrap();
-
-//sweggar 확인해보기

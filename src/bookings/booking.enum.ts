@@ -10,9 +10,6 @@ export enum BookingStatusEnum {
   OVERTIME = '반납 요청',
 }
 
-//id 직접 넣지 말고, 바뀌어도 괜찮게 만들기, code에 맞는 필드를 추가
-
 export enum CommissionEnum {
   RATE = 0.05,
 }
-//module안으로 옮기기
