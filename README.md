@@ -85,21 +85,25 @@ Notion <br>
   - user가 예약을 생성하는 기능으로, 해당 호스트 차량의 기존 예약과 날짜가 겹칠 경우 에러를 반환하여 동일한 날짜에 중복으로 예약되지 않도록 예외처리 하였습니다.
   - client 측에서 계산한 수수료를 body로 전달 받으나, 서버에서 계산한 수수료 값이 다를 경우 에러를 반환합니다. 수수료율이 변경 되었을 때 시간차로 인해 변경된 수수료율이 반영되지 못하고 요청이 넘어오는 상황을 고려하였습니다.<br><br>
   
-  **10. 결제**
-    **10.1 결제 생성** 📌[코드 확인](https://github.com/walwald/WECAR/blob/d9c8c0d7b349d3e5714ac3eec7b5f3841697f15d/src/payments/payments.service.ts#L42)
+  **10. 결제**<br>
+  - **10.1 결제 생성** 📌[코드 확인](https://github.com/walwald/WECAR/blob/d9c8c0d7b349d3e5714ac3eec7b5f3841697f15d/src/payments/payments.service.ts#L42)
     - 예약 uuid와 결제 수단을 body로 전달 받아 결제 내역을 생성하는 기능으로, 유효하지 않은 예약 uuid인 경우 에러를 반환합니다.
     - 해당 예약 건에 대해 이미 결제 내역이 생성된 경우 해당 결제 내역을 반환합니다.
     - 생성 시 결제 상태는 '결제 대기'입니다.<br><br>
-    **10.2 Toss 결제 승인 및 결제 완료** 📌[코드 확인](https://github.com/walwald/WECAR/blob/d9c8c0d7b349d3e5714ac3eec7b5f3841697f15d/src/payments/payments.service.ts#L71)
+  - **10.2 Toss 결제 승인 및 결제 완료** 📌[코드 확인](https://github.com/walwald/WECAR/blob/d9c8c0d7b349d3e5714ac3eec7b5f3841697f15d/src/payments/payments.service.ts#L71)
     - Toss 결제 API를 사용하였습니다.
     - client 측에서 toss 결제 API를 사용하여 1차적으로 결제를 완료하면, 서버에서 secret key를 사용하여 결제 승인 요청을 toss측에 요청하여 결제를 마무리합니다.
     - 결제 완료와 함께 예약 상태를 '예약 완료', 결제 상태롤 '결제 완료'로 업데이트 합니다.
     - toss로부터 응답받은 데이터는 필요한 정보만 데이터베이스에 저장합니다.
-    - 모든 과정은 transaction 처리하여 에러 발생 시 rollback 되도록 하였고, toss 승인 요청 이후 에러가 발생할 경우 승인 취소 요청을 보내도록 하였습니다.
-    
+    - 모든 과정은 transaction 처리하여 에러 발생 시 rollback 되도록 하였고, toss 승인 요청 이후 에러가 발생할 경우 승인 취소 요청을 보내도록 하였습니다.<br><br>
+
     
   **11. 호스트 차량/예약 상태 업데이트 scheduler**
+  - scheduler
+  <br><br>
   **12. 예약/결제 log 기록 subscriber**
+  - subscrbier
+  <br><br>
     
 
     
