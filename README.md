@@ -48,7 +48,7 @@ Notion <br>
 
  ## 📍[Postman](https://documenter.getpostman.com/view/26388948/2s93eeQUpz)
  프로젝트 진행 시 Postman의 Documentation을 publsih하여 프론트엔드와 소통하였습니다. <br>
- client가 사용한 모든 API를 Postman에서 확인할 수 있습니다.<br>
+ client가 사용한 모든 API를 Postman에서 확인할 수 있습니다.<br><br>
  <img width="1512" alt="스크린샷 2023-06-06 17 53 46" src="https://github.com/walwald/WECAR/assets/120387100/4f9d453e-83bd-482b-8332-4537be228fcb">
 
 <br>
@@ -56,9 +56,9 @@ Notion <br>
  <br>
  
  ## 📍핵심 기능
-  WECAR 서비스의 핵심은 차량 대여 중계입니다.
-  호스트 유저는 자신의 차량을 등록하여 예약을 받고, 일반 유저는 대여할 차량을 선택해 예약하고 결제합니다.
-  admin 기능으로는 호스트 유저가 차량 등록 시 활용할 수 있도록 차량 브랜드, 모델, 옵션 등을 등록하는 기능이 있습니다.
+  WECAR 서비스의 핵심은 차량 대여 중계입니다.<br>
+  호스트는 자신의 차량을 등록하여 예약을 받고, 일반 유저는 대여할 차량을 선택해 예약하고 결제합니다.<br>
+  admin 기능으로는 호스트 유저가 차량 등록 시 활용할 수 있도록 차량 브랜드, 모델, 옵션 등을 등록하는 기능이 있습니다. <br>
   <details>
   <summary> 핵심 기능 설명 펼치기 </summary>
   <div markdown="1">
