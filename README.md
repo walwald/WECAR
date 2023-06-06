@@ -42,12 +42,13 @@ Notion <br>
 
  ## 📍[ERD](https://dbdiagram.io/d/645ca847dca9fb07c4e4dd14)
  일반 user, host, 차량 모델, 등록 차량(host car), 예약, 결제를 중점적으로 ERD를 설계하였습니다. <br><br>
-![WECAR](https://github.com/walwald/WECAR/assets/120387100/3c36067a-1bef-4fb4-acb8-47f28042d2fe)
+ 
 <br>
 
  ## 📍[Postman](https://documenter.getpostman.com/view/26388948/2s93eeQUpz)
  프로젝트 진행 시 Postman의 Documentation을 활용하여 프론트엔드와 소통하였습니다. <br><br>
- 
+ <img width="1512" alt="스크린샷 2023-06-06 17 53 46" src="https://github.com/walwald/WECAR/assets/120387100/4f9d453e-83bd-482b-8332-4537be228fcb">
+
 <br>
 
  <br>
@@ -67,6 +68,8 @@ Notion <br>
     6. 호스트 차량 상세 정보
     7. 예약
     8. 결제
+    9. 상태 업데이트 scheduler
+    10. log 기록 subscriber
     
   </div>
   </details>
