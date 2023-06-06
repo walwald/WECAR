@@ -41,12 +41,13 @@ Notion <br>
 
 
  ## 📍[ERD](https://dbdiagram.io/d/645ca847dca9fb07c4e4dd14)
- > 일반 user, host, 차량 모델, 등록 차량(host car), 예약, 결제를 중점적으로 ERD를 설계하였습니다. <br><br>
+ 일반 user, host, 차량 모델, 등록 차량(host car), 예약, 결제를 중점적으로 ERD를 설계하였습니다. <br><br>
 ![WECAR](https://github.com/walwald/WECAR/assets/120387100/3c36067a-1bef-4fb4-acb8-47f28042d2fe)
 <br>
 
  ## 📍[Postman](https://documenter.getpostman.com/view/26388948/2s93eeQUpz)
-> 프로젝트 진행 시 Postman의 Documentation을 활용하여 프론트엔드와 소통하였습니다. <br><br>
+ 프로젝트 진행 시 Postman의 Documentation을 활용하여 프론트엔드와 소통하였습니다. <br><br>
+ 
 <br>
 
  <br>
@@ -55,14 +56,34 @@ Notion <br>
   WECAR 서비스의 핵심은 차량 대여 중계입니다.
   호스트 유저는 자신의 차량을 등록하여 예약을 받고, 일반 유저는 대여할 차량을 선택해 예약하고 결제합니다.
   admin 기능으로는 호스트 유저가 차량 등록 시 활용할 수 있도록 차량 브랜드, 모델, 옵션 등을 등록하는 기능이 있습니다.
-  
+  <details>
+  <summary> 핵심 기능 설명 펼치기 </summary>
+  <div markdown="1">
+    1. 회원가입
+    2. 로그인
+    3. 차량/옵션 등록
+    4. 호스트 차량 등록
+    5. 호스트 차량 리스트 (필터/검색)
+    6. 호스트 차량 상세 정보
+    7. 예약
+    8. 결제
+    
+  </div>
+  </details>
+
+<br>
 
  ## 📍핵심 트러블 슈팅
  
+ <br>
+ 
  ## 📍그 외 트러블 슈팅
+
+<br>
 
  ## 📍느낀점/회고
  > 3차 프로젝트 회고록: https://walwaldev.tistory.com
+ <br>
  
  ## 📍Reference
 
