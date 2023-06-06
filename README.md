@@ -49,26 +49,36 @@ Notion <br>
   WECAR 서비스의 핵심은 차량 대여 중계입니다.<br>
   호스트는 자신의 차량을 등록하여 예약을 받고, 일반 유저는 대여할 차량을 선택해 예약하고 결제합니다.<br>
   admin 기능으로는 호스트 유저가 차량 등록 시 활용할 수 있도록 차량 브랜드, 모델, 옵션 등을 등록하는 기능이 있습니다. <br><br>
-  [Postman](https://documenter.getpostman.com/view/26388948/2s93eeQUpz): 프로젝트 진행 시 Postman의 Documentation을 publsih하여 프론트엔드와 소통하였습니다. <br>
- client가 사용한 모든 API를 Postman에서 확인할 수 있습니다.<br><br>
- <img width="1512" alt="스크린샷 2023-06-06 17 53 46" src="https://github.com/walwald/WECAR/assets/120387100/4f9d453e-83bd-482b-8332-4537be228fcb">
+  
+  1. 회원가입/로그인
+  - 일반 유저와 호스트를 구별하여 회원가입/로그인 되도록 구현했습니다.
+  - 사용자 정보에 있어 공통된 property는 BaseUser로 작성하여 호스트와 일반 유저가 extends 하도록 했습니다. 📌[코드 확인](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/users/entities/base-user.entity.ts#L5)
+  - 비밀번호 암호화, 로그인 시 비밀번호 확인과 같은 기본적인 기능을 BaseUser의 메서드로 작성하여, 추후 다른 유형의 유저가 추가되더라도 코드의 중복 없이 사용가능하도록 하였습니다. 📌[코드 확인](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/users/entities/base-user.entity.ts#L33)
+
+  2. Token Refresh 📌코드 확인 - [user](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/users/users.controller.ts#L28), [host](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/hosts/hosts.controller.ts#L28)
+  - 보안 강화를 위하여 access token의 만료시간을 상대적으로 짧게 설정하여 access token 만료 시 refresh token으로 인증하여 새 token을 발급받도록 구현했습니다.
+
+  3. 차량/옵션 등록 📌코드 확인 - [모델 등록](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/cars/cars.controller.ts#L34), [옵션 등록](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/cars/cars.controller.ts#L49)
+  - WECAR의 페이지 관리자가 사용하는 차량 모델 신규 등록, 차량 옵션 선택지 등록 기능을 구현했습니다.
+
+  6. 호스트 차량 등록
+  7. 호스트 차량 리스트 (필터/검색)
+  8. 호스트 차량 상세 정보
+  9. 예약
+  10. 결제
+  11. 상태 업데이트 scheduler
+  12. log 기록 subscriber
+    
   <details>
   <summary> 핵심 기능 설명 펼치기 </summary>
   <div markdown="1">
-    1. 회원가입
-    2. 로그인
-    3. 차량/옵션 등록
-    4. 호스트 차량 등록
-    5. 호스트 차량 리스트 (필터/검색)
-    6. 호스트 차량 상세 정보
-    7. 예약
-    8. 결제
-    9. 상태 업데이트 scheduler
-    10. log 기록 subscriber
+
     
   </div>
   </details>
-
+  
+  [Postman](https://documenter.getpostman.com/view/26388948/2s93eeQUpz): 프로젝트 진행 시 Postman의 Documentation을 활용하여 프론트엔드와 소통하였습니다. <br>
+ client가 사용한 모든 API를 Postman에서 확인할 수 있습니다.<br><br>
 <br>
 
  ## 5. 핵심 트러블 슈팅
