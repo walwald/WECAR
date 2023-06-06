@@ -1,5 +1,4 @@
 # WECAR - backend
-장다희([**Github**](https://github.com/walwald), [회고록](https://walwaldev.tistory.com))<br>
 
 **3차 팀 프로젝트** <br>
 c2c 공간 대여 중계 플랫폼 Airbnb를 모델링하여, c2c 차량 대여 중계 플랫폼 WECAR 웹사이트 제작<br>
