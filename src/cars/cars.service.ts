@@ -133,6 +133,10 @@ export class CarsService {
 
   async createOption(options: string[]): Promise<Option[]> {
     const optionList = options.map((option) => {
+      const existingOption = this.optionRepository.findOneBy({
+        name: `${option}`,
+      });
+      if (existingOption) return existingOption;
       const createdOption = this.optionRepository.create({ name: `${option}` });
       this.optionRepository.save(createdOption);
       return createdOption;
