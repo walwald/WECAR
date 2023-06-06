@@ -20,7 +20,7 @@ import { HostAuthGuard } from 'src/auth/security';
 @Controller('cars')
 export class CarsController {
   constructor(private readonly carsService: CarsService) {}
-  //custon origin - header > bot 접근 막음
+  //custom origin - header > bot 접근 막음
   @Get('brands')
   getBrandList(): Promise<Brand[]> {
     return this.carsService.getBrandList();
