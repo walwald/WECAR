@@ -48,32 +48,53 @@ Notion <br>
  ## 4. 핵심 기능
   WECAR 서비스의 핵심은 차량 대여 중계입니다.<br>
   호스트는 자신의 차량을 등록하여 예약을 받고, 일반 유저는 대여할 차량을 선택해 예약하고 결제합니다.<br>
-  admin 기능으로는 호스트 유저가 차량 등록 시 활용할 수 있도록 차량 브랜드, 모델, 옵션 등을 등록하는 기능이 있습니다. <br><br>
+  페이지를 관리하는 admin 기능으로 호스트 유저가 차량 등록 시 활용할 수 있도록 차량 브랜드, 모델, 옵션 등을 등록하는 기능이 있습니다. <br><br>
+
+  <br>
   
-  1. 회원가입/로그인
+  **1. 회원가입/로그인**
   - 일반 유저와 호스트를 구별하여 회원가입/로그인 되도록 구현했습니다.
   - 사용자 정보에 있어 공통된 property는 BaseUser로 작성하여 호스트와 일반 유저가 extends 하도록 했습니다. 📌[코드 확인](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/users/entities/base-user.entity.ts#L5)
-  - 비밀번호 암호화, 로그인 시 비밀번호 확인과 같은 기본적인 기능을 BaseUser의 메서드로 작성하여, 추후 다른 유형의 유저가 추가되더라도 코드의 중복 없이 사용가능하도록 하였습니다. 📌[코드 확인](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/users/entities/base-user.entity.ts#L33)
+  - 비밀번호 암호화, 로그인 시 비밀번호 확인과 같은 기본적인 기능을 BaseUser의 메서드로 작성하여, 추후 다른 유형의 유저가 추가되더라도 코드의 중복 없이 사용가능하도록 하였습니다. 📌[코드 확인](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/users/entities/base-user.entity.ts#L33)<br>
 
-  2. Token Refresh 📌코드 확인 - [user](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/users/users.controller.ts#L28), [host](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/hosts/hosts.controller.ts#L28)
-  - 보안 강화를 위하여 access token의 만료시간을 상대적으로 짧게 설정하여 access token 만료 시 refresh token으로 인증하여 새 token을 발급받도록 구현했습니다.
+  **2. 로그인 history 기록** 📌코드 확인 - [user](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/users/users.service.ts#L67), [host](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/hosts/hosts.service.ts#L72)
+  - 보안 강화 측면에서 일반 유저와 호스트가 로그인 할 때마다 ip, agent, 시간이 기록되어 history를 남기도록 했습니다.<br>
 
-  3. 차량/옵션 등록 📌코드 확인 - [모델 등록](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/cars/cars.controller.ts#L34), [옵션 등록](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/cars/cars.controller.ts#L49)
-  - WECAR의 페이지 관리자가 사용하는 차량 모델 신규 등록, 차량 옵션 선택지 등록 기능을 구현했습니다.
+  **3. Token Refresh** 📌코드 확인 - [user](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/users/users.controller.ts#L28), [host](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/hosts/hosts.controller.ts#L28)
+  - 보안 강화를 위하여 access token의 만료시간을 상대적으로 짧게 설정하여 access token 만료 시 refresh token으로 인증하여 새 token을 발급받도록 구현했습니다.<br>
 
-  6. 호스트 차량 등록
-  7. 호스트 차량 리스트 (필터/검색)
-  8. 호스트 차량 상세 정보
-  9. 예약
-  10. 결제
-  11. 상태 업데이트 scheduler
-  12. log 기록 subscriber
+  **4. 차량/옵션 등록** 📌코드 확인 - [모델 등록](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/cars/cars.service.ts#L48), [옵션 등록](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/cars/cars.service.ts#L134)
+  - WECAR의 페이지 관리자가 사용하는 차량 모델 신규 등록, 차량 옵션 선택지 등록 기능을 구현했습니다.<br>
+
+  **5. 호스트 차량 등록** 📌[코드 확인](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/cars/cars.service.ts#L176)
+  - 호스트가 차량을 등록하는 API로, nested Dto를 활용하여 필수 정보가 모두 입력되어야 차량이 등록되도록 했습니다. 📌[코드 확인](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/cars/dto/car-register.dto.ts#L6)
+  - 차량 등록 과정에서 사진 파일 업데이트는 AWS의 S3를 활용하여, 서버에서 signed url을 생성하여 client에게 보내 client가 해당 url로 파일을 업로드하는 방식을 택했습니다.📌[코드 확인](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/utils/aws.service.ts#L15)
+  - 파일 업로드를 마치면 client가 파일 업로드가 완료된 url을 해당 차량 정보와 함께 차량 등록시 body로 전송하도록 하였습니다.<br>
+  
+  **6. 호스트 차량 리스트 (필터/검색)** 📌[코드 확인](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/cars/cars.service.ts#L241)
+  - 예약 가능한 host car 리스트를 제공하는 API로, query parameter를 통해 필터 조건과 pagenation을 위한 page number를 전달 받습니다.
+  - 적용될 수 있는 필터에는 '주소', '예약 시작 날짜와 종료 날짜', '최소 탑승 인원', '브랜드', '배기량', '차량 유형', '연료 유형', '일일 최소 대여료', '일일 최대 대여료', '탑승 정원', '차량 옵션'이 있으며, 모두 동시에 적용 가능합니다.
+  - pagenation을 별도의 함수로 작성하여 관리가 쉽고 재사용될 수 있도록 하였습니다. 📌[코드 확인](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/utils/utils.service.ts#L38)
+  - 필터 적용 조건에 따른 데이터의 개수를 total count로 전달하여 client 측 pagenation이 용이하게 하였습니다.
+  
+  **7. 호스트 차량 상세 정보** 📌[코드 확인](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/cars/cars.service.ts#L369)
+  - 호스트 차량의 상세 정보를 조회하는 기능입니다.
+  - 해당 차량의 예약 내역 날짜도 함께 전달하여, client가 이미 예약된 날짜를 예약 불가능한 것으로 표시하고, 예약 가능한 날짜를 user에게 보여줄 수 있도록 하였습니다.
+  
+  **9. 예약**
+  
+  **10. 결제**
+    10.1 결제 생성
+    10.2 Toss 결제 승인 및 결제 완료
+  **11. 호스트 차량/예약 상태 업데이트 scheduler**
+  **12. 예약/결제 log 기록 subscriber**
     
-  <details>
-  <summary> 핵심 기능 설명 펼치기 </summary>
-  <div markdown="1">
 
     
+<details>
+<summary>핵심 기능 설명 펼치기</summary>
+<div markdown="1">
+
   </div>
   </details>
   
@@ -82,11 +103,12 @@ Notion <br>
 <br>
 
  ## 5. 핵심 트러블 슈팅
- 
+ 1. 호스트 차량 리스트 필터 query문
+ 2. toss payment transaction 처리 & 에러 핸들링
  <br>
  
  ## 6. 그 외 트러블 슈팅
-
+- 
 <br>
 
  ## 7. 느낀점/회고
