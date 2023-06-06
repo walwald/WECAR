@@ -19,7 +19,7 @@ c2c 공간 대여 중계 플랫폼 Airbnb를 모델링하여, c2c 차량 대여 
 
 ## 📍사용 기술
 
-* **Backend** <br>
+* **Backend** <br> 버전 적기
 TypeScript <br>
 NestJS <br>
 JWT <br>
