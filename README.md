@@ -48,22 +48,26 @@ Notion <br>
  ## 4. 핵심 기능
   WECAR 서비스의 핵심은 차량 대여 중계입니다.<br>
   호스트는 자신의 차량을 등록하여 예약을 받고, 일반 유저는 대여할 차량을 선택해 예약하고 결제합니다.<br>
-  페이지를 관리하는 admin 기능으로 호스트 유저가 차량 등록 시 활용할 수 있도록 차량 브랜드, 모델, 옵션 등을 등록하는 기능이 있습니다. <br><br>
+  페이지를 관리하는 admin 기능으로 호스트 유저가 차량 등록 시 활용할 수 있도록 차량 브랜드, 모델, 옵션 등을 등록하는 기능이 있습니다. <br>
+    
+<details>
+<summary>핵심 기능 설명 펼치기</summary>
+<div markdown="1">
 
-  <br>
+  <br>   
   
   **1. 회원가입/로그인**
   - 일반 유저와 호스트를 구별하여 회원가입/로그인 되도록 구현했습니다.
   - 사용자 정보에 있어 공통된 property는 BaseUser로 작성하여 호스트와 일반 유저가 extends 하도록 했습니다. 📌[코드 확인](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/users/entities/base-user.entity.ts#L5)
   - 비밀번호 암호화, 로그인 시 비밀번호 확인과 같은 기본적인 기능을 BaseUser의 메서드로 작성하여, 추후 다른 유형의 유저가 추가되더라도 코드의 중복 없이 사용가능하도록 하였습니다. 📌[코드 확인](https://github.com/walwald/WECAR/blob/61706973829c77ffc0211e8d130e1977f282bbb9/src/users/entities/base-user.entity.ts#L33)<br><br>
 
-  **2. 로그인 history 기록** 📌코드 확인 - [user](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/users/users.service.ts#L67), [host](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/hosts/hosts.service.ts#L72)
+  **2. 로그인 history 기록** 📌[user](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/users/users.service.ts#L67), [host](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/hosts/hosts.service.ts#L72) 코드 확인
   - 보안 강화 측면에서 일반 유저와 호스트가 로그인 할 때마다 ip, agent, 시간이 기록되어 history를 남기도록 했습니다.<br><br>
 
-  **3. Token Refresh** 📌코드 확인 - [user](https://github.com/walwald/WECAR/blob/d9c8c0d7b349d3e5714ac3eec7b5f3841697f15d/src/users/users.service.ts#L77), [host](https://github.com/walwald/WECAR/blob/d9c8c0d7b349d3e5714ac3eec7b5f3841697f15d/src/hosts/hosts.service.ts#L83)
+  **3. Token Refresh** 📌[user](https://github.com/walwald/WECAR/blob/d9c8c0d7b349d3e5714ac3eec7b5f3841697f15d/src/users/users.service.ts#L77), [host](https://github.com/walwald/WECAR/blob/d9c8c0d7b349d3e5714ac3eec7b5f3841697f15d/src/hosts/hosts.service.ts#L83) 코드 확인
   - 보안 강화를 위하여 access token의 만료시간을 상대적으로 짧게 설정하여 access token 만료 시 refresh token으로 인증하여 새 token을 발급받도록 구현했습니다.<br><br>
 
-  **4. 차량/옵션 등록** 📌코드 확인 - [모델 등록](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/cars/cars.service.ts#L48), [옵션 등록](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/cars/cars.service.ts#L134)
+  **4. 차량/옵션 등록** 📌[모델 등록](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/cars/cars.service.ts#L48), [옵션 등록](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/cars/cars.service.ts#L134) 코드 확인
   - WECAR의 페이지 관리자가 사용하는 차량 모델 신규 등록, 차량 옵션 선택지 등록 기능을 구현했습니다.<br><br>
 
   **5. 호스트 차량 등록** 📌[코드 확인](https://github.com/walwald/WECAR/blob/79f83c50a39af7d885bf06ae04bf1094630031d7/src/cars/cars.service.ts#L176)
@@ -98,23 +102,23 @@ Notion <br>
     - 모든 과정은 transaction 처리하여 에러 발생 시 rollback 되도록 하였고, toss 승인 요청 이후 에러가 발생할 경우 승인 취소 요청을 보내도록 하였습니다.<br><br>
 
     
-  **11. 호스트 차량/예약 상태 업데이트 scheduler**
-  - scheduler
+  **11. 호스트 차량/예약 상태 업데이트 scheduler** 📌[코드 확인](https://github.com/walwald/WECAR/blob/6acfc21ad484b14f493bedc7da852b57fceb3a4e/src/utils/scheduler.service.ts#L11)
+  - 호스트 차량의 예약 가능 날짜와, 대여 예약 날짜에 따라 상태가 업데이트되는 scheduler 기능을 구현했습니다.
+  - 호스트 차량의 예약 가능 기간 중 마짐막 날이 지나면 상태가 대여 불가인 'false'로 업데이트됩니다.
+  - 대여 종료일이 지나면 예약 상태가 '반납 대기'로 업데이트됩니다.
   <br><br>
-  **12. 예약/결제 log 기록 subscriber**
-  - subscrbier
-  <br><br>
-    
-
-    
-<details>
-<summary>핵심 기능 설명 펼치기</summary>
-<div markdown="1">
-
-  </div>
-  </details>
   
-  [Postman](https://documenter.getpostman.com/view/26388948/2s93eeQUpz): 프로젝트 진행 시 Postman의 Documentation을 활용하여 프론트엔드와 소통하였습니다. <br>
+  **12. 예약/결제 log 기록 subscriber** 📌[예약](https://github.com/walwald/WECAR/blob/6acfc21ad484b14f493bedc7da852b57fceb3a4e/src/bookings/booking.subscriber.ts#L8), [결제](https://github.com/walwald/WECAR/blob/6acfc21ad484b14f493bedc7da852b57fceb3a4e/src/payments/payment.subscriber.ts#L8) 코드 확인
+  - 예약 또는 결제의 상태가 업데이트될 때마다 id, 상태, 시간에 대한 log를 남기는 subscrbier 기능을 구현했습니다.
+  <br>
+  
+  ---
+  
+  <br>
+</div>
+</details>
+  
+  - [Postman](https://documenter.getpostman.com/view/26388948/2s93eeQUpz): 프로젝트 진행 시 Postman의 Documentation을 활용하여 프론트엔드와 소통하였습니다. <br>
  client가 사용한 모든 API를 Postman에서 확인할 수 있습니다.<br><br>
 <br>
 
