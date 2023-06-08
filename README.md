@@ -218,7 +218,6 @@ Notion <br>
       </div>
       </details>
                    
-      <br>
              
 - 그러나 기존 코드의 경우 날짜 필터가 적용된 최종 결과에 페이지네이션이 적용될 수 없다는 것을 깨달았습니다. 
 - TypeOrm으로도 subquery를 사용할 수 있다는 것을 알게되어, subquery를 활용해 복잡한 조건을 query로 작성하여 문제를 해결했습니다. <br> 
@@ -307,13 +306,191 @@ Notion <br>
     </details>
 
   <br>
-  <br>
   
  #### 2. toss payment transaction 처리 & 에러 핸들링
+ - toss 결제 API를 사용하여 서버 승인 절차를 진행하는 과정에서, toss에 요청을 보내는 과정 이후에는 transaction 처리를 하지 않았습니다.
+ - toss에 요청을 보낸 이후에는 toss에 보낸 요청까지 rollback할 수 없기에, 이후 에러가 발생하더라도 rollback하는 것이 의미 없다고 판단했습니다. 
  
-        <br>
-  
+    <details>
+    <summary>기존 코드</summary>
+    <div markdown="1"> 
+
+     ```TypeScript
+     //src/payments/payments.service.ts
+     async completeTossPayment(tossKey: TossKeyDto) {
+        let response;
+        let payment;
+        await this.entityManager.transaction(async (entityManager) => {
+          payment = await this.paymentRepository.findOneBy({
+            booking: { uuid: tossKey.orderId },
+          });
+
+          if (!payment) throw new NotFoundException('Create Payment First');
+      
+          const paymentStatus = await this.getPaymentStatus('SUCCESS');
+          await entityManager.update(
+            Payment,
+            { booking: { uuid: tossKey.orderId } },
+            { id: payment.id, status: paymentStatus },
+          );
+      
+          const bookingStatus = await this.bookingsService.getBookingStatus(
+            'BOOKED',
+          );
+      
+          await entityManager.update(
+            Booking,
+            { uuid: tossKey.orderId },
+            { uuid: tossKey.orderId, status: bookingStatus },
+          );
+
+          const encodedKey = Buffer.from(
+            `${this.config.get('TOSS_KEY')}:`,
+          ).toString('base64');
+
+          const options = {
+            method: 'POST',
+            url: `${this.config.get('TOSS_URL')}`,
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Basic ${encodedKey}`,
+            },
+            data: {
+              paymentKey: tossKey.paymentKey,
+              amount: tossKey.amount,
+              orderId: tossKey.orderId,
+            },
+          };
+          try {
+            response = await firstValueFrom(this.httpService.request(options));
+          } catch (error) {
+            console.error(error);
+            throw new ServiceUnavailableException('Toss Connection Error');
+          }
+        });
+
+        if (!response.data)
+          throw new ServiceUnavailableException('Toss Info Response Error');
+
+        const tossInfoEntry = this.tossInfoRepository.create({
+          status: response.data.status,
+          currency: response.data.currency,
+          requestedAt: response.data.requestedAt,
+          approvedAt: response.data.approvedAt,
+          totalAmount: response.data.totalAmount,
+          vat: response.data.vat,
+          method: response.data.method,
+          payment: payment,
+        });
+
+        return this.tossInfoRepository.save(tossInfoEntry);
+      }
+    }
+    ```
+
+  </div>
+  </details>
+   
+        
+ - 그러나 toss API에 승인 취소 요청을 보낼 수 있다는 것을 알게 되었습니다.
+ - 관련 요청을 전부 transaction 처리하며, toss에 승인 요청을 보낸 이후 에러가 발생하는 경우는 별도의 try/catch문을 사용하여 승인 취소 요청을 보내도록 처리했습니다.
+        
+        
+    <details>
+    <summary>개선된 코드</summary>
+    <div markdown="1">   
+    
+      ```TypeScript
+      //src/payments/payments.service.ts
+      async completeTossPayment(tossKey: TossKeyDto) {
+        await this.entityManager.transaction(async (entityManager) => {
+          const payment = await this.paymentRepository.findOneBy({
+            booking: { uuid: tossKey.orderId },
+          });
+
+          if (!payment) throw new NotFoundException('Create Payment First');
+
+          const paymentStatus = await this.getPaymentStatus('SUCCESS');
+          await entityManager.update(
+            Payment,
+            { booking: { uuid: tossKey.orderId } },
+            { id: payment.id, status: paymentStatus },
+          );
+
+          const bookingStatus = await this.bookingsService.getBookingStatus(
+            'BOOKED',
+          );
+
+          await entityManager.update(
+            Booking,
+            { uuid: tossKey.orderId },
+            { uuid: tossKey.orderId, status: bookingStatus },
+          );
+
+          const encodedKey = Buffer.from(
+            `${this.config.get('TOSS_KEY')}:`,
+          ).toString('base64');
+
+          const options = {
+            method: 'POST',
+            url: `${this.config.get('TOSS_URL')}`,
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Basic ${encodedKey}`,
+            },
+            data: {
+              paymentKey: tossKey.paymentKey,
+              amount: tossKey.amount,
+              orderId: tossKey.orderId,
+            },
+          };
+
+          const response = await lastValueFrom(this.httpService.request(options));
+
+          if (!response.data) {
+            throw new ServiceUnavailableException('Toss Info Connection Error');
+          }
+
+          try {
+            const tossInfoEntry = entityManager.create(TossInfo, {
+              status: response.data.status,
+              currency: response.data.currency,
+              requestedAt: response.data.requestedAt,
+              approvedAt: response.data.approvedAt,
+              totalAmount: response.data.totalAmount,
+              vat: response.data.vat,
+              method: response.data.method,
+              payment: payment,
+            });
+
+            return entityManager.save(TossInfo, tossInfoEntry);
+          } catch (err) {
+            const options = {
+              method: 'POST',
+              url: `${this.config.get('TOSS_CANCEL_URL')}/${
+                tossKey.paymentKey
+              }/cancel`,
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Basic ${encodedKey}`,
+              },
+              data: {
+                cancelReason: '서버 에러',
+              },
+            };
+
+            await lastValueFrom(this.httpService.request(options));
+            throw new InternalServerErrorException('DataBase Error');
+          }
+        });
+      }
+      ```
+      
+    </div>
+    </details>  
  
+ <br><br>
+        
  ## 6. 그 외 트러블 슈팅
 - 
 <br>
