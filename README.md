@@ -550,7 +550,7 @@ Notion <br>
   </details>  
   
   <details>
-  <summary>Subscriber에 필요한 변수 넘겨주기</summary>
+  <summary>Event Subscriber에 필요한 변수 넘겨주기</summary>
   <div markdown="1">  
   
   <br>
