@@ -520,6 +520,32 @@ Notion <br>
   </div>
   </details>  
         
+  <details>
+  <summary>필터 적용 시 Pagenation 문제</summary>
+  <div markdown="1">   
+    - 차량 목록에 필터를 적용하여 pagenation을 적용할 때, 필터가 적용된 목록의 개수를 client에게 전달하지 않으면 client가 전체 페이지 수를 알 수 없다는 것을 간과했습니다.
+    - 필터된 목록의 total count와 각 페이지에 맞는 데이터를 함께 응답하여 문제를 해결했습니다.
+  </div>
+  </details>  
+  
+  <details>
+  <summary>Subscriber에 필요한 변수 넘겨주기</summary>
+  <div markdown="1">  
+    - after update subscriber에서 event.entity를 사용하여 필요한 인자를 끌어오려 했으나, update의 경우 update된 value만 끌어올 수 있다는 것을 알게 되었습니다.
+    - 값이 변하지 않더라도 update 메서드에서 값을 재지정하여 subscriber에서 event.entity로 값을 불러올 수 있게 하였습니다.
+  </div>
+  </details>  
+  
+  <details>
+  <summary>Token Refresh를 위해 Access Token 만료 메시지 보내기</summary>
+  <div markdown="1"> 
+    - client가 token refresh 요청을 보내기 위해서는 유효하지 않은 token 에러 메시지와 구별되는 access token 만료 메시지가 필요했습니다.
+    - 기존에는 Passport Strategy만을 사용해 특정 상황에 대한 error 메시지를 반환했습니다.
+    - Passport Strategy 뿐만 아니라 AuthGuard에서도 상황에 따라 error 메시지를 반환하도록 지정해주어 문제를 해결했습니다.
+  </div>
+  </details>  
+        
+        
 
  ## 7. 느낀점/회고
  > 3차 프로젝트 회고록: https://walwaldev.tistory.com
