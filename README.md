@@ -20,7 +20,6 @@ c2c 공간 대여 중계 플랫폼 Airbnb를 모델링하여, c2c 차량 대여 
 * **Backend** <br>
 TypeScript 4.7 <br>
 NestJS v9<br>
-JWT <br>
 TypeOrm 0.3<br>
 MySql 5.7<br>
 Rest <br>
