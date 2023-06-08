@@ -605,7 +605,7 @@ Notion <br>
  <br><br>
         
  ## 7. 느낀점/회고
- > 3차 프로젝트 회고록: https://walwaldev.tistory.com
+ > 3차 프로젝트 회고록: https://walwaldev.tistory.com/66
  <br>
  
  ## Reference
