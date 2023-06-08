@@ -491,8 +491,35 @@ Notion <br>
  <br><br>
         
  ## 6. 그 외 트러블 슈팅
-- 
-<br>
+  <details>
+  <summary>중첩된 객체의 Validation Pipe Dto 미적용 문제</summary>
+  <div markdown="1">         
+    - 차량 등록 과정에서 요청 body를 validate하는 Dto를 작성하였습니다.
+    - 객체의 value를 또 다른 객체로 요구하고 Type을 지정하였는데 객체 내 객체에 대해서는 validation이 적용되지 않았습니다.
+    - 검색을 통해 이러한 경우 @ValidateNest()와 @Type() 데코레이터를 사용해야 한다는 것을 알게되었습니다.
+    ```TypeScript
+    //src/cars/dto/car-register.dto.ts
+    export class CarRegisterDto {
+      @IsNotEmpty()
+      @IsObject()
+      @ValidateNested()
+      @Type(() => NewHostCarDto)
+      newHostCar: NewHostCarDto;
+
+      @IsArray()
+      files: FileDto[];
+    }
+    ```
+  </div>
+  </details>  
+
+  <details>
+  <summary>circular dependency 문제</summary>
+  <div markdown="1">   
+    - 각 module에서 forwardRef(() => )를 사용하며 service를 exports 하여 해결했습니다. 
+  </div>
+  </details>  
+        
 
  ## 7. 느낀점/회고
  > 3차 프로젝트 회고록: https://walwaldev.tistory.com
