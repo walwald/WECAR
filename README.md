@@ -132,87 +132,87 @@ Notion <br>
       <summary>기존 코드</summary>
       <div markdown="1">
 
-        ```TypeScript
-         //src/cars/cars.service.ts
+      ```TypeScript
+       //src/cars/cars.service.ts
 
-         async getHostCars(filter: CarFilterDto): Promise<HostCar[]> {
-          const limitNumber = 12;
-          const skip = filter.page ? (filter.page - 1) * limitNumber : 0;
+       async getHostCars(filter: CarFilterDto): Promise<HostCar[]> {
+        const limitNumber = 12;
+        const skip = filter.page ? (filter.page - 1) * limitNumber : 0;
 
-          if (!filter.startDate !== !filter.endDate)
-            throw new BadRequestException('One of Start date or End date is Missnig');
+        if (!filter.startDate !== !filter.endDate)
+          throw new BadRequestException('One of Start date or End date is Missnig');
 
-          const query = this.hostCarRepository
-            .createQueryBuilder('hostCar')
-            .leftJoinAndSelect('hostCar.carModel', 'carModel')
-            .leftJoinAndSelect('hostCar.fuelType', 'fuelType')
-            .leftJoinAndSelect('hostCar.options', 'option')
-            .leftJoinAndSelect('hostCar.bookings', 'booking')
-            .leftJoinAndSelect('hostCar.files', 'file')
-            .leftJoinAndSelect('carModel.brand', 'brand')
-            .leftJoinAndSelect('carModel.engineSize', 'engineSize')
-            .leftJoinAndSelect('carModel.carType', 'carType')
-            .where('hostCar.status = true')
-            .take(limitNumber)
-            .skip(skip)
-            .select([
-              'hostCar.id',
-              'hostCar.pricePerDay',
-              'hostCar.address',
-              'hostCar.startDate',
-              'hostCar.endDate',
-              'carModel.name',
-              'brand.name',
-              'file.url',
-              'booking',
-            ]);
+        const query = this.hostCarRepository
+          .createQueryBuilder('hostCar')
+          .leftJoinAndSelect('hostCar.carModel', 'carModel')
+          .leftJoinAndSelect('hostCar.fuelType', 'fuelType')
+          .leftJoinAndSelect('hostCar.options', 'option')
+          .leftJoinAndSelect('hostCar.bookings', 'booking')
+          .leftJoinAndSelect('hostCar.files', 'file')
+          .leftJoinAndSelect('carModel.brand', 'brand')
+          .leftJoinAndSelect('carModel.engineSize', 'engineSize')
+          .leftJoinAndSelect('carModel.carType', 'carType')
+          .where('hostCar.status = true')
+          .take(limitNumber)
+          .skip(skip)
+          .select([
+            'hostCar.id',
+            'hostCar.pricePerDay',
+            'hostCar.address',
+            'hostCar.startDate',
+            'hostCar.endDate',
+            'carModel.name',
+            'brand.name',
+            'file.url',
+            'booking',
+          ]);
 
-            //다른 조건 관련 코드 생략
+          //다른 조건 관련 코드 생략
 
-            if (filter.startDate && filter.endDate) {
-            query
-              .andWhere(
-                'DATE_FORMAT(hostCar.startDate, "%Y-%m-%d") <= :startDate 
-                 AND DATE_FORMAT(hostCar.endDate, "%Y-%m-%d") >= :startDate',
-                { startDate: `${filter.startDate}` },
-              )
-              .andWhere(
-                'DATE_FORMAT(hostCar.endDate, "%Y-%m-%d") >= :endDate 
-                 AND DATE_FORMAT(hostCar.startDate, "%Y-%m-%d") <= :endDate',
-                  { endDate: `${filter.endDate}` },
+          if (filter.startDate && filter.endDate) {
+          query
+            .andWhere(
+              'DATE_FORMAT(hostCar.startDate, "%Y-%m-%d") <= :startDate 
+               AND DATE_FORMAT(hostCar.endDate, "%Y-%m-%d") >= :startDate',
+              { startDate: `${filter.startDate}` },
+            )
+            .andWhere(
+              'DATE_FORMAT(hostCar.endDate, "%Y-%m-%d") >= :endDate 
+               AND DATE_FORMAT(hostCar.startDate, "%Y-%m-%d") <= :endDate',
+                { endDate: `${filter.endDate}` },
+              );
+          }
+
+          let filteredCars = await query.getMany();
+
+          if (filter.startDate && filter.endDate) {
+            filteredCars = filteredCars.filter((car) => {
+              let result = true;
+              car.bookings.forEach((booking) => {
+                const bookingStartDate = new Date(booking.startDate);
+                const bookingEndDate = new Date(booking.endDate);
+
+                const correctedBookingStartDate = new Date(
+                  bookingStartDate.getTime() + 24 * 60 * 60 * 1000,
                 );
-            }
+                const correctedBookingEndDate = new Date(
+                  bookingEndDate.getTime() + 24 * 60 * 60 * 1000,
+                );
+                const filterStartDate = new Date(filter.startDate);
+                const filterEndDate = new Date(filter.endDate);
 
-            let filteredCars = await query.getMany();
-
-            if (filter.startDate && filter.endDate) {
-              filteredCars = filteredCars.filter((car) => {
-                let result = true;
-                car.bookings.forEach((booking) => {
-                  const bookingStartDate = new Date(booking.startDate);
-                  const bookingEndDate = new Date(booking.endDate);
-
-                  const correctedBookingStartDate = new Date(
-                    bookingStartDate.getTime() + 24 * 60 * 60 * 1000,
-                  );
-                  const correctedBookingEndDate = new Date(
-                    bookingEndDate.getTime() + 24 * 60 * 60 * 1000,
-                  );
-                  const filterStartDate = new Date(filter.startDate);
-                  const filterEndDate = new Date(filter.endDate);
-
-                  result =
-                    result &&
-                    (correctedBookingEndDate < filterStartDate ||
-                      correctedBookingStartDate > filterEndDate);
-                  return result;
-                });
+                result =
+                  result &&
+                  (correctedBookingEndDate < filterStartDate ||
+                    correctedBookingStartDate > filterEndDate);
                 return result;
               });
-            }
-            return Promise.all(filteredCars);
+              return result;
+            });
           }
-        ```
+          return Promise.all(filteredCars);
+        }
+      ```
 
       </div>
       </details>
@@ -316,6 +316,7 @@ Notion <br>
 
      ```TypeScript
      //src/payments/payments.service.ts
+      
      async completeTossPayment(tossKey: TossKeyDto) {
         let response;
         let payment;
@@ -401,6 +402,7 @@ Notion <br>
     
       ```TypeScript
       //src/payments/payments.service.ts
+      
       async completeTossPayment(tossKey: TossKeyDto) {
         await this.entityManager.transaction(async (entityManager) => {
           const payment = await this.paymentRepository.findOneBy({
@@ -494,12 +496,15 @@ Notion <br>
   <details>
   <summary>중첩된 객체의 Validation Pipe Dto 미적용 문제</summary>
   <div markdown="1">         
-    
+  
+  <br>
+        
   - 차량 등록 과정에서 요청 body를 validate하는 Dto를 작성하였습니다.
   - 객체의 value를 또 다른 객체로 요구하고 Type을 지정하였는데 객체 내 객체에 대해서는 validation이 적용되지 않았습니다.
   - 검색을 통해 이러한 경우 `@ValidateNest()`와 `@Type()` 데코레이터를 사용해야 한다는 것을 알게되었습니다. [참고한 stackoverflow](https://stackoverflow.com/questions/53650528/validate-nested-objects-using-class-validator-in-nest-js-controller)
   ```TypeScript
   //src/cars/dto/car-register.dto.ts
+    
   export class CarRegisterDto {
     @IsNotEmpty()
     @IsObject()
@@ -511,15 +516,21 @@ Notion <br>
     files: FileDto[];
   }
   ```
-
+  
+  <br>
+    
   </div>
   </details>  
 
   <details>
   <summary>circular dependency 문제</summary>
   <div markdown="1">   
-    
+  
+  <br>
+        
   - 각 module에서 `forwardRef(() => )`를 사용하며 service를 `exports` 하여 해결했습니다. 
+      
+  <br>
     
   </div>
   </details>  
@@ -527,50 +538,67 @@ Notion <br>
   <details>
   <summary>필터 적용 시 Pagenation 문제</summary>
   <div markdown="1">   
-
+  
+  <br>
+    
   - 차량 목록에 필터를 적용하여 pagenation을 적용할 때, 필터가 적용된 목록의 개수를 client에게 전달하지 않으면 client가 전체 페이지 수를 알 수 없다는 것을 간과했습니다.
   - 필터된 목록의 `total count`와 각 페이지에 맞는 데이터를 함께 응답하여 문제를 해결했습니다.
-
+  
+  <br>
+    
   </div>
   </details>  
   
   <details>
   <summary>Subscriber에 필요한 변수 넘겨주기</summary>
   <div markdown="1">  
-
+  
+  <br>
+    
   - after update subscriber에서 `event.entity`를 사용하여 필요한 인자를 끌어오려 했으나, update의 경우 update된 value만 끌어올 수 있다는 것을 알게 되었습니다.
   - 값이 변하지 않더라도 update 메서드에서 필요한 값을 동일한 값으로 update하도록 하여 subscriber에서 event.entity로 값을 불러올 수 있게 하였습니다.
-
+  
+  <br>
+    
   </div>
   </details>  
   
   <details>
   <summary>Token Refresh를 위해 Access Token 만료 메시지 보내기</summary>
   <div markdown="1"> 
-
+  
+  <br>
+    
   - client가 token refresh 요청을 보내기 위해서는 유효하지 않은 token 에러 메시지와 구별되는 access token 만료 메시지가 필요했습니다.
   - 기존에는 Passport Strategy만을 사용해 특정 상황에 대한 error 메시지를 반환했습니다.
   - Passport Strategy 뿐만 아니라 `AuthGuard`에서도 상황에 따라 error 메시지를 반환하도록 지정해주어 문제를 해결했습니다.
-
+  
+  <br>
+    
   </div>
   </details>  
         
   <details>
   <summary>MySql 데이터 상 날짜와 생성된 Date 객체 날짜 간극 문제</summary>
   <div markdown="1"> 
-
+  
+  <br>
+    
   - MySql에 날짜 데이터를 저장할 때의 날짜와, MySql에서 데이터를 호출하였을 때 보여지는 날짜가 달라 어려움을 겪었습니다.
   - MySql의 timezone은 한국으로 설정되어 있었는데, 데이터베이스에서 날짜를 호출하여 가져올 때 국제 표준 시간으로 변환된다는 것을 알게 되었습니다.
   - 국제 표준 시간에서 한국 시간으로 변환하는 함수를 만들어 사용했습니다.
 
   ```TypeScript
     //src/utils/utils.service.ts
+    
     makeKrDate(date: Date): Date {
       const correctedDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
       return correctedDate;
     }
   ```
-
+  
+  <br>
+    
   </div>
   </details>  
 
