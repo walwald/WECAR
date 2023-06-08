@@ -1,4 +1,4 @@
-# 📍WECAR - backend
+# 📍WECAR - Backend
 
 c2c 공간 대여 중계 플랫폼 Airbnb를 모델링하여, c2c 차량 대여 중계 플랫폼 WECAR 웹사이트 제작<br>
 
@@ -48,7 +48,7 @@ Notion <br>
  ## 4. 핵심 기능
   WECAR 서비스의 핵심은 차량 대여 중계입니다.<br>
   호스트는 자신의 차량을 등록하여 예약을 받고, 일반 유저는 대여할 차량을 선택해 예약하고 결제합니다.<br>
-  페이지를 관리하는 admin 기능으로 호스트 유저가 차량 등록 시 활용할 수 있도록 차량 브랜드, 모델, 옵션 등을 등록하는 기능이 있습니다. <br>
+  페이지를 관리하는 admin 기능으로 차량 브랜드, 모델, 옵션 등을 신규 등록하는 기능이 있습니다. <br>
     
 <details>
 <summary>핵심 기능 설명 펼치기</summary>
@@ -123,9 +123,196 @@ Notion <br>
 <br>
 
  ## 5. 핵심 트러블 슈팅
- 1. 호스트 차량 리스트 필터 query문
- 2. toss payment transaction 처리 & 에러 핸들링
- <br>
+ #### 1. 호스트 차량 리스트 날짜 필터 query문
+  - user가 '시작 날짜'와 '종료 날짜' 필터를 적용할 경우, 해당 날짜에 예약이 가능한 호스트 차량이 검색되도록 하고자 했습니다.
+  - 호스트가 지정한 예약 가능 날짜를 필터하는 것은 간단했으나, 각 차량에 이미 등록된 예약과 날짜가 겹치면 검색되지 않도록 하는 부분이 까다로웠습니다. 
+  - user가 설정한 날짜와 하루라도 날짜가 겹치는 예약이 하나라도 있으면 해당 차량은 검색되지 않아야 했습니다.
+  - query문으로 위 조건을 표현하는 데에 한계가 있다고 판단하여, 초기에는 query문으로 데이터를 추출하여 service에서 데이터를 가공하고자 했습니다.
+
+      <details>
+      <summary>기존 코드</summary>
+      <div markdown="1">
+
+        ```TypeScript
+         //src/cars/cars.service.ts
+
+         async getHostCars(filter: CarFilterDto): Promise<HostCar[]> {
+          const limitNumber = 12;
+          const skip = filter.page ? (filter.page - 1) * limitNumber : 0;
+
+          if (!filter.startDate !== !filter.endDate)
+            throw new BadRequestException('One of Start date or End date is Missnig');
+
+          const query = this.hostCarRepository
+            .createQueryBuilder('hostCar')
+            .leftJoinAndSelect('hostCar.carModel', 'carModel')
+            .leftJoinAndSelect('hostCar.fuelType', 'fuelType')
+            .leftJoinAndSelect('hostCar.options', 'option')
+            .leftJoinAndSelect('hostCar.bookings', 'booking')
+            .leftJoinAndSelect('hostCar.files', 'file')
+            .leftJoinAndSelect('carModel.brand', 'brand')
+            .leftJoinAndSelect('carModel.engineSize', 'engineSize')
+            .leftJoinAndSelect('carModel.carType', 'carType')
+            .where('hostCar.status = true')
+            .take(limitNumber)
+            .skip(skip)
+            .select([
+              'hostCar.id',
+              'hostCar.pricePerDay',
+              'hostCar.address',
+              'hostCar.startDate',
+              'hostCar.endDate',
+              'carModel.name',
+              'brand.name',
+              'file.url',
+              'booking',
+            ]);
+
+            //다른 조건 관련 코드 생략
+
+            if (filter.startDate && filter.endDate) {
+            query
+              .andWhere(
+                'DATE_FORMAT(hostCar.startDate, "%Y-%m-%d") <= :startDate 
+                 AND DATE_FORMAT(hostCar.endDate, "%Y-%m-%d") >= :startDate',
+                { startDate: `${filter.startDate}` },
+              )
+              .andWhere(
+                'DATE_FORMAT(hostCar.endDate, "%Y-%m-%d") >= :endDate 
+                 AND DATE_FORMAT(hostCar.startDate, "%Y-%m-%d") <= :endDate',
+                  { endDate: `${filter.endDate}` },
+                );
+            }
+
+            let filteredCars = await query.getMany();
+
+            if (filter.startDate && filter.endDate) {
+              filteredCars = filteredCars.filter((car) => {
+                let result = true;
+                car.bookings.forEach((booking) => {
+                  const bookingStartDate = new Date(booking.startDate);
+                  const bookingEndDate = new Date(booking.endDate);
+
+                  const correctedBookingStartDate = new Date(
+                    bookingStartDate.getTime() + 24 * 60 * 60 * 1000,
+                  );
+                  const correctedBookingEndDate = new Date(
+                    bookingEndDate.getTime() + 24 * 60 * 60 * 1000,
+                  );
+                  const filterStartDate = new Date(filter.startDate);
+                  const filterEndDate = new Date(filter.endDate);
+
+                  result =
+                    result &&
+                    (correctedBookingEndDate < filterStartDate ||
+                      correctedBookingStartDate > filterEndDate);
+                  return result;
+                });
+                return result;
+              });
+            }
+            return Promise.all(filteredCars);
+          }
+        ```
+
+      </div>
+      </details>
+                   
+      <br>
+             
+- 그러나 기존 코드의 경우 날짜 필터가 적용된 최종 결과에 페이지네이션이 적용될 수 없다는 것을 깨달았습니다. 
+- TypeOrm으로도 subquery를 사용할 수 있다는 것을 알게되어, subquery를 활용해 복잡한 조건을 query로 작성하여 문제를 해결했습니다. <br> 
+
+    <details>
+    <summary>개선된 코드</summary>
+    <div markdown="1">
+                   
+     ```TypeScript            
+       //src/cars/cars.service.ts
+
+       async getHostCars(filter: CarFilterDto): Promise<FilteredList> {
+        if (!filter.startDate !== !filter.endDate)
+          throw new BadRequestException('One of Start date or End date is Missnig');
+
+        const query = this.hostCarRepository
+          .createQueryBuilder('hostCar')
+          .leftJoinAndSelect('hostCar.carModel', 'carModel')
+          .leftJoinAndSelect('hostCar.fuelType', 'fuelType')
+          .leftJoinAndSelect('hostCar.options', 'option')
+          .leftJoinAndSelect('hostCar.bookings', 'booking')
+          .leftJoinAndSelect('hostCar.files', 'file')
+          .leftJoinAndSelect('carModel.brand', 'brand')
+          .leftJoinAndSelect('carModel.engineSize', 'engineSize')
+          .leftJoinAndSelect('carModel.carType', 'carType')
+          .where('hostCar.status = true')
+          .orderBy('hostCar.id', 'DESC')
+          .groupBy('hostCar.id')
+          .select([
+            'hostCar.id',
+            'hostCar.pricePerDay',
+            'hostCar.address',
+            'hostCar.startDate',
+            'hostCar.endDate',
+            'carModel.name',
+            'brand.name',
+            'file.url',
+            'booking',
+          ]);  
+
+        //다른 조건 관련 코드 생략
+
+        if (filter.startDate && filter.endDate) {
+          query
+            .andWhere(
+              'DATE_FORMAT(hostCar.startDate, "%Y-%m-%d") <= :startDate AND DATE_FORMAT(hostCar.endDate, "%Y-%m-%d") >= :startDate',
+              { startDate: `${filter.startDate}` },
+            )
+            .andWhere(
+              'DATE_FORMAT(hostCar.endDate, "%Y-%m-%d") >= :endDate AND DATE_FORMAT(hostCar.startDate, "%Y-%m-%d") <= :endDate',
+              { endDate: `${filter.endDate}` },
+            )
+            .leftJoin(
+              (subQuery) =>
+                subQuery
+                  .select('*')
+                  .from('bookings', 'booking')
+                  .where('!(start_date > :endDate or end_date < :startDate)', {
+                    startDate: filter.startDate,
+                    endDate: filter.endDate,
+                  }),
+              'booking_query',
+              'hostCar.id = booking_query.hostCarId',
+            )
+            .having('count(booking_query.id) < 1');
+        }           
+
+        const allFilteredCars = await query.getMany();
+
+        const totalCount = allFilteredCars.length;
+
+        await this.utilsService.pagenation(query, filter.page);
+
+        const pageantedCars = await query.getMany();
+
+        pageantedCars.forEach((car) => {
+          car.startDate = this.utilsService.makeKrDate(car.startDate);
+          car.endDate = this.utilsService.makeKrDate(car.endDate);
+        });
+
+        return { totalCount, hostCars: pageantedCars };
+      }
+     ```
+
+    </div>
+    </details>
+
+  <br>
+  <br>
+  
+ #### 2. toss payment transaction 처리 & 에러 핸들링
+ 
+        <br>
+  
  
  ## 6. 그 외 트러블 슈팅
 - 
