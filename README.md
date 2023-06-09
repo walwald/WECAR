@@ -601,7 +601,39 @@ Notion <br>
     
   </div>
   </details>  
+  <details>
+  <summary>이중 promise 객체 에러</summary>
+  <div markdown="1"> 
+  
+  <br>
+    
+  - 비동기 함수 안에서 map메서드를 사용하며 또다른 비동기 함수를 실행하여 return 값이 `Promise<Promise<Option>[]>` 형태로 반환되는 에러를 겪었습니다.
+  - `Promise.all()`을 사용해 모든 비동기 작업이 완료된 후에 결과를 반환하도록 수정하여, `Promise<Option[]>` 형태로 결과가 반환되게 할 수 있었습니다. 
+  ```TypeScript
+  //src/cars/cars.service.ts
+    
+  async createOption(options: string[]): Promise<Option[]> {
+    const optionList = options.map((option) => {
+      const existingOption = this.optionRepository.findOneBy({
+        name: `${option}`,
+      });
+      if (existingOption) return existingOption;
+      const createdOption = this.optionRepository.create({ name: `${option}` });
+      this.optionRepository.save(createdOption);
+      return createdOption;
+    });
 
+    return Promise.all(optionList);
+  }
+ ```
+    
+    
+  <br>
+    
+  </div>
+  </details>  
+        
+        
  <br><br>
         
  ## 7. 느낀점/회고
