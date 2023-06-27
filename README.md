@@ -306,7 +306,7 @@ Notion <br>
 
   <br>
   
- #### 2. toss payment transaction 처리 & 에러 핸들링
+ #### 2. toss payment 결제 승인 transaction 처리 & 에러 핸들링
  - toss 결제 API를 사용하여 서버 승인 절차를 진행하는 과정에서, toss에 요청을 보내는 과정 이후에는 transaction 처리를 하지 않았습니다.
  - toss에 요청을 보낸 이후에는 toss에 보낸 요청까지 rollback할 수 없기에, 이후 에러가 발생하더라도 rollback하는 것이 의미 없다고 판단했습니다. 
  
